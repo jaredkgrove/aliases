@@ -8,18 +8,22 @@ import {
 export default function WordCard(props) {
     const [input, handleInputChange] = useInputChange()
 
-    const handleJoinRoom = () => {
-        if(input.room && input.room !== ''){
-            props.socket.emit('joinGame', input.room)
-        }       
+    const handleJoinRoom = (e, team) => {
+        if(!input.room || input.room === ''){
+            e.preventDefault()
+        }else(
+            props.handleGameJoin(input.room, team, input.spymaster, input.spyName)
+        )       
     };
 
     return (
       <StyledCard  >
           <h3>Join Room</h3>
           <input type="text"  placeholder="Room Name" name="room" value ={input.room || ''} onChange={handleInputChange}/>
-          <input type="text" placeholder="Alias"/>
-          <Link to='/game' onClick={handleJoinRoom}>Join</Link>
+          <input type="text" name="spyName" placeholder="Alias" alue={input.spyName || ''} onChange={handleInputChange}/>
+          <input type="checkbox" name="spymaster" value={input.spymaster || false} onChange={handleInputChange}/>
+          <Link to="/game" onClick={(e) => handleJoinRoom(e, 'red')}>Join Red Team</Link>
+          <Link to="/game" onClick={(e) => handleJoinRoom(e, 'blue')}>Join Blue Team</Link>
       </StyledCard>
     );
 }

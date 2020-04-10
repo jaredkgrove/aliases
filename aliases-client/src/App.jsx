@@ -11,39 +11,26 @@ import styled from 'styled-components'
 const socket = io("http://127.0.0.1:4001");
 
 function App () {
-  const [response, setResponse] = useState([{word:"hi"}]);
-  // const [endpoint, setEndpoint] = useState("http://127.0.0.1:4001");
-  
-  // useEffect(() => {
-  //   const 
-
-  //   socket.on("boardUpdate", data => {
-       
-  //     setResponse([
-  //       ...data
-  //     ])
-  //     setCount(count + 1)
-  //   });
-  //   return
-  // }); //only re-run the effect if new message comes in
-
-useEffect(() => {
-    const handler = (data) => {setResponse(data)};
-    socket.on('boardUpdate', handler);
-    
-    return () => {
-        socket.off('boardUpdate', handler);
-    }
-}, []);
+  const [spyName, setSpyName] = useState('')
+  const [spyMaster, setSpyMaster] = useState(false)
+  const [game, setGame] = useState('')
+  const [team, setTeam] = useState('')
+  const handleGameJoin = (game, team, spymaster, name) => {
+    setSpyMaster(spymaster)
+    setSpyName(name)
+    setGame(game)
+    setTeam(team)
+    socket.emit('joinGame', game, team, spymaster, name)
+  }
 
     return (
       <Layout>
         <Switch>
           <Route exact path="/">
-            <RoomJoin socket={socket}></RoomJoin>
+            <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin>
           </Route>
           <Route path="/game">
-            <Board socket={socket} cardArray={response}/>
+          {!spyName ? <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin> : <Board socket={socket} io={io} spyMaster={spyMaster} spyName={spyName} game={game} team={team}/>}
           </Route>
         </Switch>
       </Layout>

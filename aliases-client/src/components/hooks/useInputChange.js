@@ -4,10 +4,15 @@ export const useInputChange = () => {
   const [input, setInput] = useState({})
 
   const handleInputChange = (e) => {
-      console.log(input)
+      let value
+      if(e.currentTarget.type === 'checkbox'){
+        value = e.currentTarget.checked
+      }else{
+        value = e.currentTarget.value
+      }
       setInput({
     ...input,
-    [e.currentTarget.name]: e.currentTarget.value
+    [e.currentTarget.name]: value
   })
 }
 
