@@ -7,7 +7,7 @@ const socketIo = require("socket.io");
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
-const {emptyBoard, words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
+const {words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
 app.use(index);
 
 const io = socketIo(server); // < Interesting!
@@ -28,21 +28,21 @@ const setBoard = (roomName, newBoard) => getRoom(roomName).gameBoard = newBoard
 const getWord = (roomName, index) => getBoard(roomName)[index].word
 const getWordIndex = (roomName, word) => getBoard(roomName).findIndex(card => card.word === word)
 const initializeBoard = (roomName) => {
-  let newBoard = generateRandomGameBoard(words, 25).map((word, i) =>  ({word: word.word, identity: IdentityEnum.HIDDEN}))
+  let newBoard = generateRandomGameBoard(words, 25).map((word, i) =>  ({word: word, identity: IdentityEnum.HIDDEN}))
   setBoard(roomName, newBoard)
 }
 
 //CIPHER
 const getCipher = (roomName) => getRoom(roomName).cipher
-// const updateCipher = (roomName, index, word)
-const setCipher = (roomName, newCipher) => getCipher(roomName).cipher = newCipher
+const setCipher = (roomName, newCipher) => getRoom(roomName).cipher = newCipher
 const getCipherCard = (roomName, word) => getCipher(roomName).find(card => card.word === word)
 
 const initializeCipher = (roomName) => {
-  let newCipher = generateRandomGameCardArray(getBoard(roomName), 25).map((card, i) => ({word: card.word, identity:blueFirstCipher[i].identity}))
+  let newCipher = generateRandomGameBoard(getBoard(roomName), 25).map((card, i) => ({word: card.word, identity:blueFirstCipher[i].identity, revealed: false}))
+  console.log(newCipher)
   setCipher(roomName, newCipher)
 }
-getCipherIdentity = (roomName, word) => getCipher(roomName) 
+const getCipherIdentity = (roomName, word) => getCipher(roomName).find(card => card.word === word).identity
 
 //TEAMS
 const getCurrentTeamColor = (roomName) => getRoom(roomName).currentTurnTeam
@@ -54,7 +54,7 @@ const setStartingTeam = (roomName) => {
 //SPIES
 const getSpies = (roomName, teamColor) => getRoom(roomName + teamColor).spies
 const initializeSpies = (roomName, teamColor) => getRoom(roomName + teamColor).spies = []
-const setSpies = (roomName, teamColor, newSpyData) => getRoom(roomName, teamColor).spies = newSpyData
+const setSpies = (roomName, teamColor, newSpyData) => getRoom(roomName + teamColor).spies = newSpyData
 const addSpy = (roomName, teamColor, spyData) => getSpies(roomName, teamColor).push(spyData)
 const getSpy = (roomName, teamColor, spyName) => getSpies(roomName, teamColor).find(spy => spy.spyName === spyName)
 const getSpyIndex = (roomName, teamColor, spyName) => getSpies(roomName, teamColor).findIndex(spy => spy.spyName === spyName)
@@ -66,7 +66,7 @@ const addSpyToTeam = (roomName, teamColor, spyName) => {
     initializeSpies(roomName, teamColor)
   }
   if(!getSpy(roomName, teamColor, spyName)){
-    addSpy({spyName: spyName, cardSelection: getWord(roomName, 0)})
+    addSpy(roomName, teamColor, {spyName: spyName, cardSelection: getWord(roomName, 0)})
   }
 }
 
@@ -87,6 +87,7 @@ const joinGame = (socket, roomName, teamColor, spyName, spyMaster) => {
 
 const initializeGame = (roomName) => {
   initializeBoard(roomName)
+
   setStartingTeam(roomName)
   initializeCipher(roomName)
 }
@@ -143,20 +144,25 @@ io.on("connection", socket => {
   socket.on('updateBoard', (word) => {
     let caIndex = getWordIndex(socket.roomName, word)
     let cipherIndex = getCipher(socket.roomName).findIndex(c => c.word === word)
-
+    console.log(getCipher(socket.roomName))
     let oldBoard = getBoard(socket.roomName)
-    let oldCipher = getCipher(roomName)
-
+    let oldCipher = getCipher(socket.roomName)
+    console.log(caIndex)
+    console.log(cipherIndex)
     if( caIndex >= 0 && cipherIndex >= 0){
+
       let newBoard = [...oldBoard.slice(0, caIndex), {word: word, identity:oldCipher[cipherIndex].identity}, ...oldBoard.slice(caIndex+1)]
-      let newCipher = [...oldCipher.slice(0, cipherIndex), {...oldCipher.slice(cipherIndex, cipherIndex), ...{revealed: true}}, ...oldCipher.slice(cipherIndex+1)]
+      let oldCipherCard = oldCipher.slice(cipherIndex, cipherIndex+1)[0]
+      let newCipher = [...oldCipher.slice(0, cipherIndex), {word: oldCipherCard.word, identity: oldCipherCard.identity, revealed: true}, ...oldCipher.slice(cipherIndex+1)]
       setBoard(socket.roomName, newBoard)
+      console.log(newCipher)
       setCipher(socket.roomName, newCipher)
-      sendBoard(roomName)
-      let identityString = getIdentityString(getCipherCardIdenity(socket.roomName, word).identity)//Make this better
+      sendBoard(socket.roomName)
+      console.log( getCipher(socket.roomName))
+      let identityString = getIdentityString(getCipherIdentity(socket.roomName, word))//Make this better
  
       if(identityString !== socket.teamColor){
-        switchCurrentTeam(roomName)
+        switchCurrentTeam(socket.roomName)
       }
     }
   })
@@ -169,7 +175,7 @@ io.on("connection", socket => {
 
   socket.on("changeSelection", (word) => {
     let i = getSpyIndex(socket.roomName, socket.teamColor, socket.spyName)
-    let oldSpyData = getSpies(socket.teamRoom, socket.teamColor)
+    let oldSpyData = getSpies(socket.roomName, socket.teamColor)
     let newSpyData = [...oldSpyData.slice(0, i), {spyName: socket.spyName, cardSelection: word}, ...oldSpyData.slice(i+1)]
     setSpies(socket.roomName, socket.teamColor, newSpyData)
     sendSpies(socket.roomName, socket.teamColor)
@@ -183,7 +189,7 @@ io.on("connection", socket => {
   socket.on("disconnect", () => {
     if(getTeamRoom(socket.roomName, socket.teamColor)){
       let i = getSpyIndex(socket.roomName, socket.teamColor, socket.spyName)
-      let oldSpyData = getSpies(socket.teamRoom, socket.teamColor)
+      let oldSpyData = getSpies(socket.roomName, socket.teamColor)
       let newSpyData = [...oldSpyData.slice(0,i), ...oldSpyData.spies.slice(i+1)]
       setSpies(socket.roomName, socket.teamColor, newSpyData)
 

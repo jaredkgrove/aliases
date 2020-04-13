@@ -12,7 +12,7 @@ export default function Board(props) {
   // const [selections, setSelections] = useState([])
   const [toRoomJoin, setToRoomJoin] = useState(false)
   useEffect(() => {
-    props.socket.on('boardUpdate', data => setCardArray(data));
+    props.socket.on('boardUpdate', data => setCardArray(data))
     props.socket.on('setCipher', data => setCipher(data))
     props.socket.on('spiesUpdate', data => setSpies(data))
     // props.socket.emit('joinGame', game, team, props.spymaster, props.spyName)
@@ -34,6 +34,7 @@ export default function Board(props) {
     
     return (
       <>
+      {console.log(cardArray)}
         <BoardHeader socket={props.socket} team={props.team}/>
         <StyledBoard onClick={handleClick} > 
           <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team}/>
