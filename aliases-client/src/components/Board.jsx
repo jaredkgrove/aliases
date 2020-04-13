@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components'
 import CardGrid from './CardGrid'
+import BoardHeader from './BoardHeader'
 
 // import IndentityCardsContainer from './IndentityCardsContainer'
 export default function Board(props) {
@@ -24,7 +25,6 @@ export default function Board(props) {
       props.socket.off('boardUpdate', data => setCardArray(data));
       props.socket.off('setCipher', data => setCipher(data))
       props.socket.off('spiesUpdate', data => setSpies(data))
-
     }
   }, []);
   
@@ -33,21 +33,25 @@ export default function Board(props) {
     }
     
     return (
-      // <StyledBoard onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onDragStart={(e) => e.preventDefault()}>
-      <StyledBoard onClick={handleClick} > 
-      {/* <IndentityCardsContainer identityCardSelect={identityCardSelect} dragCard={dragCard} isDragging={isDragging} x={translateX} y={translateY}/> */}
-        <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies}/>
-      </StyledBoard>
+      <>
+        <BoardHeader socket={props.socket} team={props.team}/>
+        <StyledBoard onClick={handleClick} > 
+          <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team}/>
+        </StyledBoard>
+      </>
     );
 }
 
 const StyledBoard = styled.div`
   display: grid;
+  padding-top: 60px;
   grid-template-columns: 1fr;
   justify-items: stretch;
   background: white;
   box-sizing: border-box;
-  min-height: calc(100vh - 16px);
+  height: calc(100vh - 16px);
+  max-width: 100vw;
+  overflow: hidden;
 `;
 
 // const [isDragging, setIsDragging] = useState(0)

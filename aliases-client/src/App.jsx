@@ -41,5 +41,5 @@ export default App;
 
 const Layout = styled.div`
   display: block;
-  min-height: calc(100vh - 16px);
+
 `;
