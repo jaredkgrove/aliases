@@ -32,8 +32,9 @@ export default function WordCard(props) {
     const renderReveal = () => props.spies.map(spy => spy.spyName === props.spyName ? <StyledButton onClick={handleCardClick}>REAVEAL</StyledButton> : '')
 
     return (
-        <SelectionsDiv selected={props.spies.length > 0} team={props.team} onClick={handleClick}>
+        <SelectionsDiv selected={props.spies.length > 0} team={props.activeTeam} onClick={handleClick}>
             {renderSelections()}
+            {console.log(props.activeTeam)}
             <StyledCard value={1} className='Word'  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
                 {props.cardData.word}
                 {renderReveal()}

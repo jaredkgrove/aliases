@@ -6,11 +6,31 @@ export default function BoardHeader(props) {
         props.socket.emit('endTurn', props.team)
     }
     return (
-      <StyledHeader>
-        <button onClick={handleCardClick}>End Turn</button>
+      <StyledHeader color={props.activeTeam}>
+
+        <TeamDiv color='blue'>
+          <h3>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "Waiting..."}`}</h3>
+          <button onClick={handleCardClick}>End Turn</button>
+        </TeamDiv>
+        <TeamDiv color='red'>
+          <h3>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "Waiting..."}`}</h3>
+          <button onClick={handleCardClick}>End Turn</button>
+
+        </TeamDiv>
+
       </StyledHeader>
     );
+
 }
+
+const TeamDiv = styled.div`
+  width: 50%;
+  height: 100%;
+  display: inline-block;
+  background: ${props => props.color};
+`
+
+
 
 
 const StyledHeader = styled.div`
@@ -18,7 +38,6 @@ const StyledHeader = styled.div`
   top: 0px;
   left: 0px;
   width: 100vw;
-  background: black;
   height: 60px;
 `;
 

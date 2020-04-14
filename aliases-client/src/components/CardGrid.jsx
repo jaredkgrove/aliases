@@ -10,8 +10,8 @@ export default function CardGrid(props) {
         if(props.cipher){
           cipherData = props.cipher.find(elem => elem.word === data.word )
         }
-        let spies = props.spies.filter(spy => spy.cardSelection === data.word)
-        return <WordCard key={index} cardIndex={index} cardData={data} cipherData={cipherData} spies={spies} socket={props.socket} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team}></WordCard>
+        let spies = props.spies.filter(spy => spy.cardSelection === data.word && spy.team === props.activeTeam)
+        return <WordCard key={index} cardIndex={index} cardData={data} cipherData={cipherData} spies={spies} socket={props.socket} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team} activeTeam={props.activeTeam}></WordCard>
     })
   }
 
