@@ -10,6 +10,9 @@ export default function Board(props) {
   const [cipher, setCipher] = useState([{}])
   const [spies, setSpies] = useState([{}])
   const [activeTeam, setActiveTeam] = useState('')
+  const [showClueInputs, setShowClueInputs] = useState(true)
+  const [cardsRemaining, setCardsRemaining] = useState(0)
+
 
   // const [selections, setSelections] = useState([])
   const [toRoomJoin, setToRoomJoin] = useState(false)
@@ -18,7 +21,10 @@ export default function Board(props) {
     props.socket.on('setCipher', data => setCipher(data))
     props.socket.on('spiesUpdate', data => setSpies(data))
     props.socket.on('startTurn', data => setActiveTeam(data))
+    props.socket.on('promptForClue', data => setShowClueInputs(data))
+    props.socket.on('updateCardsRemaining', data => setCardsRemaining(data))
 
+    
     if(!props.spyName){
       setToRoomJoin(true)
     }else{
@@ -29,17 +35,20 @@ export default function Board(props) {
       props.socket.off('setCipher', data => setCipher(data))
       props.socket.off('spiesUpdate', data => setSpies(data))
       props.socket.off('startTurn', data => setActiveTeam(data))
+      props.socket.off('promptForClue', data => setShowClueInputs(data))
+
     }
   }, []);
   
-    const handleClick = () => {
-      
+    const sendClue = (clue) => {
+      props.socket.emit('submitClue', clue)
+      setShowClueInputs(false)
     }
     
     return (
       <>
-        <BoardHeader socket={props.socket} team={props.team} activeTeam={activeTeam} blueSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'blue')} redSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'red')}/>
-        <StyledBoard onClick={handleClick} > 
+        <BoardHeader socket={props.socket} cardsRemaining={cardsRemaining} showClueInputs={showClueInputs} sendClue={sendClue} team={props.team} activeTeam={activeTeam} isSpyMaster={props.spyMaster} blueSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'blue')} redSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'red')}/>
+        <StyledBoard> 
           <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies.filter(spy => !spy.isSpyMaster)} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team} activeTeam={activeTeam}/>
         </StyledBoard>
       </>

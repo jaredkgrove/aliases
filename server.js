@@ -61,6 +61,8 @@ const getSpyIndex = (roomName, spyName) => getSpies(roomName).findIndex(spy => s
 
 const getIdentityString = (identity) => Object.keys(IdentityEnum)[identity].toLowerCase()
 
+const decrementGuessesRemaining = (roomName) => getRoom(roomName).guessesRemaining-=1
+
 const addSpyToTeam = (roomName, teamColor, spyName, spyMaster) => {
   if(!getSpies(roomName)){
     initializeSpies(roomName)
@@ -70,13 +72,11 @@ const addSpyToTeam = (roomName, teamColor, spyName, spyMaster) => {
   }
 }
 
-
-
 const joinGame = (socket, roomName, teamColor, spyName, spyMaster) => {
   socket.join(roomName)
   if(!getRoom(roomName).spies){
     getRoom(roomName).spies = []
-
+    getRoom(roomName).guessesRemaining = 0
   }
   // socket.join(roomName + teamColor)
   if(spyMaster && !getTeamSpyMaster(roomName, teamColor)){
@@ -86,8 +86,6 @@ const joinGame = (socket, roomName, teamColor, spyName, spyMaster) => {
   socket.spyName = spyName
   socket.roomName = roomName
   socket.teamColor = teamColor
-
-
 }
 
 const initializeGame = (roomName) => {
@@ -98,10 +96,33 @@ const initializeGame = (roomName) => {
 
 const sendBoard = (roomName) => {
   try {
-    io.in(roomName).emit("boardUpdate", io.sockets.adapter.rooms[roomName].gameBoard); // Emitting a new message. It will be consumed by the client
-    io.in(roomName+"-spymasters").emit("setCipher", getCipher(roomName)); // Emitting a new message. It will be consumed by the client
+    if(getTeamSpyMaster(roomName, 'blue') && getTeamSpyMaster(roomName, 'red')){
+      io.in(roomName).emit("boardUpdate", io.sockets.adapter.rooms[roomName].gameBoard); // Emitting a new message. It will be consumed by the client
+      io.in(roomName+"-spymasters").emit("setCipher", getCipher(roomName)); // Emitting a new message. It will be consumed by the client
+      sendCardRemaining(roomName)
+    }else{
+      io.in(roomName).emit("boardUpdate", [{word: 'Waiting for SpyMasters to Join Game', team: null, isSpyMaster: null, identity: IdentityEnum.HIDDEN}]); // Emitting a new message. It will be consumed by the client
+      io.in(roomName+"-spymasters").emit("setCipher", [{word: 'Waiting for SpyMasters to Join Game', team: null, isSpyMaster: null, identity: IdentityEnum.HIDDEN}]); // Emitting a new message. It will be consumed by the client
+
+    }
+
   } catch (error) {
     console.error(`Error sendBoard: ${error.code}`);
+  }
+};
+
+const sendCardRemaining = (roomName) => {
+  try {
+    let blueCluesRevealed = getBoard(roomName).filter(card => card.identity === IdentityEnum.BLUE).length
+    let redCluesRevealed = getBoard(roomName).filter(card => card.identity === IdentityEnum.RED).length
+    let blueClues = getCipher(roomName).filter(card => card.identity === IdentityEnum.BLUE).length
+    let redClues = getCipher(roomName).filter(card => card.identity === IdentityEnum.RED).length
+    let blueRemaining = blueClues - blueCluesRevealed
+    let redRemaining = redClues - redCluesRevealed
+
+    io.in(roomName).emit("updateCardsRemaining", {blue: blueRemaining, red: redRemaining})//io.sockets.adapter.rooms[io.sockets.adapter.rooms[room].currentTurnTeam].spies); // Emitting a new message. It will be consumed by the client
+  } catch (error) {
+    console.error(`Error sendSpies: ${error.code}`);
   }
 };
 
@@ -113,19 +134,35 @@ const sendSpies = (roomName) => {
   }
 };
 
+const clearBoard = (roomName) => {
+  try {
+    io.in(roomName).emit("spiesUpdate", getSpies(roomName).filter(spy => spy.isSpyMaster))//io.sockets.adapter.rooms[io.sockets.adapter.rooms[room].currentTurnTeam].spies); // Emitting a new message. It will be consumed by the client
+  } catch (error) {
+    console.error(`Error sendSpies: ${error.code}`);
+  }
+};
+
 const sendCurrentTeam = (roomName) => {
   io.in(roomName).emit("startTurn", getCurrentTeamColor(roomName))
 } 
 
 const switchCurrentTeam = (roomName) => {
   getCurrentTeamColor(roomName) === 'blue' ? setCurrentTeam(roomName, 'red') : setCurrentTeam(roomName, 'blue')
-  sendSpies(roomName)
-  sendCurrentTeam(roomName)
+  getRoom(roomName).guessesRemaining = 0
+  clearBoard(roomName)
+  // sendSpies(roomName)
+  // sendCurrentTeam(roomName)
+}
+
+const handleEndTurn = (roomName) => {
+  switchCurrentTeam(roomName)
+  io.in(roomName+"-spymasters").emit("prompForClue", true); // Emitting a new message. It will be consumed by the client
 }
 
 io.on("connection", socket => {
 
   socket.on('joinGame', (roomName, teamColor, spyMaster, spyName) => {
+
     firstPlayer = !getRoom(roomName)
 
     joinGame(socket, roomName, teamColor, spyName, spyMaster)
@@ -137,12 +174,12 @@ io.on("connection", socket => {
     sendBoard(roomName)
     sendSpies(roomName)
     sendCurrentTeam(roomName)
-    console.log(getRoom(socket.roomName))
-
 
   })
 
   socket.on('updateBoard', (word) => {
+    console.log("updateBoard")
+
     let caIndex = getWordIndex(socket.roomName, word)
     let cipherIndex = getCipher(socket.roomName).findIndex(c => c.word === word)
 
@@ -160,31 +197,47 @@ io.on("connection", socket => {
       sendBoard(socket.roomName)
 
       let identityString = getIdentityString(getCipherIdentity(socket.roomName, word))//Make this better
- 
-      if(identityString !== socket.teamColor){
-        switchCurrentTeam(socket.roomName)
+
+      let guessesLeft = decrementGuessesRemaining(socket.roomName)
+      console.log(guessesLeft)
+      if(identityString !== socket.teamColor || guessesLeft === 0){
+        handleEndTurn(socket.roomName)
+
       }
     }
   })
 
   socket.on('endTurn', (teamColor) => {
+    console.log("endTurn")
+
     if(getCurrentTeamColor(socket.roomName) === teamColor){
-      switchCurrentTeam(socket.roomName)
+      handleEndTurn(socket.roomName)
     }
   })
 
-  socket.on("changeSelection", (word) => {
-    let i = getSpyIndex(socket.roomName, socket.spyName)
-    let oldSpiesData = getSpies(socket.roomName)
-    let spyMaster = getTeamSpyMaster(socket.roomName,socket.teamColor)
-    let newSpiesData = [...oldSpiesData.slice(0, i), {spyName: socket.spyName, cardSelection: word, team: socket.teamColor, isSpyMaster: (spyMaster && (spyMaster.spyName === socket.spyName))}, ...oldSpiesData.slice(i+1)]
-    setSpies(socket.roomName, newSpiesData)
-
-
+  socket.on('submitClue', (clueNumber) => {
+    console.log("submitClue")
+    getRoom(socket.roomName).guessesRemaining = parseInt(clueNumber) + 1
     sendSpies(socket.roomName)
+    sendCurrentTeam(socket.roomName)
+  })
+
+  socket.on("changeSelection", (word) => {
+    console.log("changeSelection")
+    if(getRoom(socket.roomName).guessesRemaining > 0)
+    {
+      let i = getSpyIndex(socket.roomName, socket.spyName)
+      let oldSpiesData = getSpies(socket.roomName)
+      let spyMaster = getTeamSpyMaster(socket.roomName,socket.teamColor)
+      let newSpiesData = [...oldSpiesData.slice(0, i), {spyName: socket.spyName, cardSelection: word, team: socket.teamColor, isSpyMaster: (spyMaster && (spyMaster.spyName === socket.spyName))}, ...oldSpiesData.slice(i+1)]
+      setSpies(socket.roomName, newSpiesData)
+  
+      sendSpies(socket.roomName)
+    }
   });
 
   socket.on("getBoard", () => {
+    console.log("getBoard")
     sendBoard(socket.roomName)
     sendSpies(socket.roomName)
   });
