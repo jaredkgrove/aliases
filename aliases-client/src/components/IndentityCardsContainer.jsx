@@ -25,7 +25,6 @@ export default function IndentityCardsContainer(props) {
 
 
     const handleMouseDown = (e) => {
-      console.log("middle")
     } 
     return (
       <StyledContainer onMouseDown={handleMouseDown}>

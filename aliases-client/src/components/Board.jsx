@@ -12,6 +12,7 @@ export default function Board(props) {
   const [activeTeam, setActiveTeam] = useState('')
   const [showClueInputs, setShowClueInputs] = useState(true)
   const [cardsRemaining, setCardsRemaining] = useState(0)
+  const [guessesRemaining, setGuessesRemaining] = useState(0)
 
 
   // const [selections, setSelections] = useState([])
@@ -21,8 +22,13 @@ export default function Board(props) {
     props.socket.on('setCipher', data => setCipher(data))
     props.socket.on('spiesUpdate', data => setSpies(data))
     props.socket.on('startTurn', data => setActiveTeam(data))
-    props.socket.on('promptForClue', data => setShowClueInputs(data))
+    props.socket.on('promptForClue', data => {
+      console.log(data)
+      console.log(showClueInputs)
+      setShowClueInputs(data)
+    })
     props.socket.on('updateCardsRemaining', data => setCardsRemaining(data))
+    props.socket.on('updateGuessesRemaining', data => setGuessesRemaining(data))
 
     
     if(!props.spyName){
@@ -36,20 +42,23 @@ export default function Board(props) {
       props.socket.off('spiesUpdate', data => setSpies(data))
       props.socket.off('startTurn', data => setActiveTeam(data))
       props.socket.off('promptForClue', data => setShowClueInputs(data))
+      props.socket.off('updateGuessesRemaining', data => setGuessesRemaining(data))
+
 
     }
   }, []);
   
     const sendClue = (clue) => {
-      props.socket.emit('submitClue', clue)
       setShowClueInputs(false)
+      console.log("just set to false")
+      props.socket.emit('submitClue', clue)
     }
     
     return (
       <>
-        <BoardHeader socket={props.socket} cardsRemaining={cardsRemaining} showClueInputs={showClueInputs} sendClue={sendClue} team={props.team} activeTeam={activeTeam} isSpyMaster={props.spyMaster} blueSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'blue')} redSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'red')}/>
+        <BoardHeader socket={props.socket} guessesRemaining={guessesRemaining} cardsRemaining={cardsRemaining} showClueInputs={showClueInputs} sendClue={sendClue} team={props.team} activeTeam={activeTeam} isSpyMaster={props.spyMaster} blueSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'blue')} redSpyMaster={spies.find(spy => spy.isSpyMaster && spy.team === 'red')}/>
         <StyledBoard> 
-          <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies.filter(spy => !spy.isSpyMaster)} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team} activeTeam={activeTeam}/>
+          <CardGrid cardArray={cardArray} cipher={cipher} socket={props.socket} spies={spies.filter(spy => !spy.isSpyMaster && guessesRemaining > 0)} spyName={props.spyName} spyMaster={props.spyMaster} team={props.team} activeTeam={activeTeam}/>
         </StyledBoard>
       </>
     );
