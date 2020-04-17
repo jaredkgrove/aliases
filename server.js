@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require('path');
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
@@ -6,20 +7,10 @@ const server = http.createServer(app);
 const socketIo = require("socket.io");
 
 const port = process.env.PORT || 4001;
-//Static file declarationa
-pp.use(express.static(path.join(__dirname, 'client/build')));
-//production mode
-if(process.env.NODE_ENV === 'production') {  app.use(express.static(path.join(__dirname, 'client/build')));  
-  app.get('*', (req, res) => {    res.sendfile(path.join(__dirname = 'aliases-client/build/index.html'));  })}
-//build mode 
-else
-  app.get('*', (req, res) => {  res.sendFile(path.join(__dirname+'/aliases-client/public/index.html'));})
-//start server
-app.listen(port, (req, res) => {  console.log( `server listening on port: ${port}`);})
 const index = require("./routes/index");
 const {words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
-app.use(index);
-
+//app.use(index);
+app.use(express.static(path.join(__dirname, 'aliases-client/build')));
 const io = socketIo(server); // < Interesting!
 
 //Encapsulated objects... sort of
