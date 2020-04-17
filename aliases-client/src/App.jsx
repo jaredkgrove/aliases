@@ -8,7 +8,7 @@ import {
 import Board from './components/Board'
 import RoomJoin from './components/RoomJoin'
 import styled from 'styled-components'
-const socket = io("http://127.0.0.1:4001");
+const socket = io("https://anonyms.herokuapp.com/");
 
 function App () {
   const [spyName, setSpyName] = useState('')
