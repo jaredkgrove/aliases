@@ -32,29 +32,33 @@ export default function WordCard(props) {
     const renderReveal = () => props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton onClick={handleCardClick}>REVEAL</StyledButton> : '')
 
     return (
-        <SelectionsDiv selected={props.spies.length > 0} team={props.activeTeam} onClick={handleClick}>
+        <ContainerDiv selected={props.spies.length > 0} team={props.activeTeam} onClick={handleClick}>
             {renderSelections()}
             <StyledCard value={1} className='Word'  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
                 {props.cardData.word}
                 {renderReveal()}
             </StyledCard>
-        </SelectionsDiv>
+        </ContainerDiv>
     );
 }
 
-const SelectionsDiv = styled.div`
-    box-sizing: border-box;
+const ContainerDiv = styled.div`
+    display: flex;
+    justify-content: stretch;
+    align-items: center;
+    box-sizingo: border-box;
     justify-self: stretch;
     border: 1px solid ${props => props.selected ? props.team:'transparant'};
-    padding: 3px 8px 8px 3px;
+    padding: 8px 3px 3px 3px;
+    overflow: hidden;
 `
 
 const StyledCard = styled.div`
-    position: relative;
     text-align: center;
     box-sizing: border-box;
     height: 100%;
-    line-height: calc(100vh/10);
+    width: 100%;
+    max-height: 20vw;
     font-size: 2.5vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -63,6 +67,8 @@ const StyledCard = styled.div`
     border-radius: 5px;
     box-shadow: 5px 5px hsl(60, 10%, 80%);
     user-select: none;
+    overflow: hidden;
+
 `;
 
 const StyledButton = styled.button`

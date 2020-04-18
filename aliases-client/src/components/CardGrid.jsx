@@ -25,7 +25,9 @@ export default function CardGrid(props) {
 const StyledCardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-gap:5px;
+  grid-template-rows: repeat(5, 1fr);
+  
+ 
   justify-items: center;
   background: white;
 `;
