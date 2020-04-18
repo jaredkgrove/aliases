@@ -45,8 +45,6 @@ export default function WordCard(props) {
 const SelectionsDiv = styled.div`
     box-sizing: border-box;
     justify-self: stretch;
-
-
     border: 1px solid ${props => props.selected ? props.team:'transparant'};
     padding: 3px 8px 8px 3px;
 `
@@ -57,14 +55,12 @@ const StyledCard = styled.div`
     box-sizing: border-box;
     height: 100%;
     line-height: calc(100vh/10);
-    font-size: 25px;
+    font-size: 2.5vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
     background: ${props => props.color};
- 
     border-radius: 5px;
-
     box-shadow: 5px 5px hsl(60, 10%, 80%);
     user-select: none;
 `;

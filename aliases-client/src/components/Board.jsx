@@ -30,7 +30,6 @@ export default function Board(props) {
     props.socket.on('updateCardsRemaining', data => setCardsRemaining(data))
     props.socket.on('updateGuessesRemaining', data => setGuessesRemaining(data))
 
-    
     if(!props.spyName){
       setToRoomJoin(true)
     }else{

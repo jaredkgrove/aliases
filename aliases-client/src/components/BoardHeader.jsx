@@ -16,10 +16,10 @@ export default function BoardHeader(props) {
 
       if(props.showClueInputs && props.activeTeam === props.team && props.team === team && props.isSpyMaster){
         return(
-          <>
-            <input type="number" placeholder="Clue Number" name="clueNumber" value={input.clueNumber || 0} onChange={handleInputChange}/>
-            <button onClick={handleClueClick}>Submit Clue</button>
-          </>
+          <ClueInput>
+            <StyledInput type="number" placeholder="Clue Number" name="clueNumber" value={input.clueNumber || 0} onChange={handleInputChange}/>
+            <StyledButton color={props.activeTeam} onClick={handleClueClick}>Submit Clue</StyledButton>
+          </ClueInput>
         )
       }else if(props.activeTeam === team && props.guessesRemaining > 0){
         return <div>{props.guessesRemaining}</div>
@@ -28,19 +28,21 @@ export default function BoardHeader(props) {
       }
     }
 
+    const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
+
     const renderEndTurnButton = (team) => (team === props.team && !props.isSpyMaster) ? <button onClick={handleCardClick}>End Turn</button>:''
 
     return (
-      <StyledHeader color={props.activeTeam}>
 
-        <TeamDiv color={`hsl(217, 100%, 84%)`}>
+      <StyledHeader color={props.activeTeam}>
+        <TeamDiv color={`hsl(217, 100%, 84%)`} active={!isOtherTeamActive('red')}>
           <h3>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "Waiting..."}`}</h3>
           {renderEndTurnButton('blue')}
           <div>{props.cardsRemaining.blue}</div>
           {renderClueInputs('blue')}
 
         </TeamDiv>
-        <TeamDiv color={`hsl(0, 100%, 84%)`}>
+        <TeamDiv color={`hsl(0, 100%, 84%)`} active={!isOtherTeamActive('blue')}> 
           <SpyMasterDiv>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "Waiting..."}`}</SpyMasterDiv>
           {renderEndTurnButton('red')}
           <div>{props.cardsRemaining.red}</div>
@@ -54,11 +56,11 @@ export default function BoardHeader(props) {
 }
 
 const TeamDiv = styled.div`
-
-
   display: inline-block;
-  height: 100%;
-  flex: 1;
+  height: 100%; 
+  display: ${props => props.active ? "block":"none"};
+  flex: ${props => props.active ? 1:0};
+
   background: ${props => props.color};
   > * {
     display: inline-block;
@@ -70,6 +72,39 @@ const SpyMasterDiv = styled.div`
 
 `
 
+const StyledInput = styled.input`
+box-sizing: border-box;
+padding: 5px;
+background: ${props => props.color};
+background-clip: content-box;
+outline: none;
+border: none;
+border-radius: 10px;
+height: 100%;
+
+`
+
+const ClueInput = styled.div`
+  position: absolute;
+  right: 0px;
+  box-sizing: border-box;
+  background-clip: content-box;
+  padding: 5px;
+  height: 100%;
+
+
+`
+
+const StyledButton = styled.button`
+  box-sizing: border-box;
+  padding: 5px;
+  background: ${props => props.color};
+  background-clip: content-box;
+  outline: none;
+  border: none;
+  border-radius: 10px;
+  height: 100%;
+`
 
 const StyledHeader = styled.div`
   position: fixed;
