@@ -8,7 +8,7 @@ import {
 import Board from './components/Board'
 import RoomJoin from './components/RoomJoin'
 import styled from 'styled-components'
-const socket = io("https://anonyms.herokuapp.com/");
+const socket = io("http://127.0.0.1:4001")//io("https://anonyms.herokuapp.com/");
 
 function App () {
   const [spyName, setSpyName] = useState('')
@@ -41,5 +41,7 @@ export default App;
 
 const Layout = styled.div`
   display: block;
-
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
 `;

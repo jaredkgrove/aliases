@@ -16,13 +16,21 @@ export default function BoardHeader(props) {
 
       if(props.showClueInputs && props.activeTeam === props.team && props.team === team && props.isSpyMaster){
         return(
-          <ClueInput>
+          <InputContainer>
             <StyledInput type="number" placeholder="Clue Number" name="clueNumber" value={input.clueNumber || 0} onChange={handleInputChange}/>
             <StyledButton color={props.activeTeam} onClick={handleClueClick}>Submit Clue</StyledButton>
-          </ClueInput>
+          </InputContainer>
         )
       }else if(props.activeTeam === team && props.guessesRemaining > 0){
-        return <div>{props.guessesRemaining}</div>
+        return (
+          <>
+            <h3>Guesses Left: {props.guessesRemaining}</h3>
+            <h3>Cards Left{props.cardsRemaining.blue}</h3>
+          </>
+        )
+      }
+      else if(!isOtherTeamActive('blue') && !isOtherTeamActive('red')){
+        return ''
       }else if(props.activeTeam === team){
         return <div>Waiting for Spy Master...</div>
       }
@@ -30,24 +38,21 @@ export default function BoardHeader(props) {
 
     const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
 
-    const renderEndTurnButton = (team) => (team === props.team && !props.isSpyMaster) ? <button onClick={handleCardClick}>End Turn</button>:''
+    const renderEndTurnButton = (team) => (team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
 
     return (
 
       <StyledHeader color={props.activeTeam}>
         <TeamDiv color={`hsl(217, 100%, 84%)`} active={!isOtherTeamActive('red')}>
-          <h3>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "Waiting..."}`}</h3>
-          {renderEndTurnButton('blue')}
-          <div>{props.cardsRemaining.blue}</div>
+          <SpyMasterDiv>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {renderClueInputs('blue')}
-
+          {renderEndTurnButton('blue')}
         </TeamDiv>
-        <TeamDiv color={`hsl(0, 100%, 84%)`} active={!isOtherTeamActive('blue')}> 
-          <SpyMasterDiv>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "Waiting..."}`}</SpyMasterDiv>
-          {renderEndTurnButton('red')}
+        <TeamDiv color={`hsl(0, 100%, 84%)`} active={!isOtherTeamActive('blue')}>
+          <SpyMasterDiv>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           <div>{props.cardsRemaining.red}</div>
           {renderClueInputs('red')}
-
+          {renderEndTurnButton('red')}
         </TeamDiv>
 
       </StyledHeader>
@@ -68,23 +73,24 @@ const TeamDiv = styled.div`
 `
 
 const SpyMasterDiv = styled.div`
-  height: 100%
+  text-align: center;
+  line-hei
+  height: 100%;
 
 `
 
 const StyledInput = styled.input`
-box-sizing: border-box;
-padding: 5px;
-background: ${props => props.color};
-background-clip: content-box;
-outline: none;
-border: none;
-border-radius: 10px;
-height: 100%;
-
+  box-sizing: border-box;
+  padding: 5px;
+  background: ${props => props.color};
+  background-clip: content-box;
+  outline: none;
+  border: none;
+  border-radius: 10px;
+  height: 100%;
 `
 
-const ClueInput = styled.div`
+const InputContainer = styled.div`
   position: absolute;
   right: 0px;
   box-sizing: border-box;
