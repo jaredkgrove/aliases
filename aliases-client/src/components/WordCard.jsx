@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import styled from 'styled-components'
 
 const Identity = {
@@ -18,7 +18,8 @@ const CipherIdentity = {
 }
 
 export default function WordCard(props) {
-    //const [color, setColor] = useState('white');
+    const [adjustedFontSize, setAdjustedFontSize] = useState(3);
+    const wordDiv = useRef(null);
     const handleCardClick = (e) => {
         props.socket.emit('updateBoard', props.cardData.word)
     }
@@ -34,11 +35,37 @@ export default function WordCard(props) {
         return props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton color='green' onClick={handleCardClick}>REVEAL</StyledButton> : '')
     }
 
+    const checkFontsize = () => {
+        if(wordDiv.current.scrollWidth > wordDiv.current.clientWidth){
+            setAdjustedFontSize(adjustedFontSize - 0.25)
+        }
+    }
+
+    useEffect(() => {
+        console.log("hello")
+        checkFontsize()
+    }, [adjustedFontSize]);
+
+    useEffect(() => {
+        function handleResize() {
+            setAdjustedFontSize(3)
+            checkFontsize()
+        }
+       
+        window.addEventListener('resize', handleResize)
+        return () => {
+            window.removeEventListener('resize', handleResize)
+        }
+    }, []);
+
+
+
     return (
-        <ContainerDiv  onClick={handleClick}>
+        <ContainerDiv  onClick={handleClick} fontSize={adjustedFontSize}>
             <SelectionsDiv> {renderSelections()} </SelectionsDiv>
             <StyledCard value={1} className='Word' selected={props.spies.length > 0} team={props.activeTeam}  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
-                {props.cardData.word}
+                <div style={{height:'19%'}}></div>
+                <div ref={wordDiv} style={{height:'40%'}}>{props.cardData.word}</div>
                 {renderReveal()}
             </StyledCard>
         </ContainerDiv>
@@ -52,26 +79,25 @@ const ContainerDiv = styled.div`
     align-items: center;
     box-sizing: border-box;
     justify-self: stretch;
-    padding: 8px 3px 3px 3px;
+    padding: 0px 2px 0px 2px;
     overflow: hidden;
-    font-size: 2.5vh;
-
+    font-size: ${props => props.fontSize}vh;
 `
 
-
 const SelectionsDiv = styled.div`
-
-    height: 25px;
+    height: 15px;
     width: 100%;
-    overflow: hidden;
+
 `
 
 const StyledCard = styled.div`
+    white-space: nowrap;
     position:relative;
     flex: 1;
     text-align: center;
     box-sizing: border-box;
     align-self: stretch;
+    justify-self: stretch;
     width: 100%;
     max-height: 20vw;
 
@@ -90,18 +116,14 @@ const StyledCard = styled.div`
 //     left:${props => props.value *40}px;
 // `;
 const StyledButton = styled.button`
-    position: absolute;
-    bottom: 0px;
-    left 0px;
-    width: 100%;
-    
+
+    width: 80%;
     margin: auto;
     box-sizing: border-box;
-    padding: 5px;
     background: ${props => props.color};
-    background-clip: content-box;
     outline: none;
     border: none;
     border-radius: 10px;
-    height: 33%;
+    height: 40%;
+    font-size: 1.5vh;
 `

@@ -3,37 +3,39 @@ import styled from 'styled-components'
 import { useInputChange } from './hooks/useInputChange'
 
 export default function BoardHeader(props) {
-  const [input, handleInputChange] = useInputChange()
+  //const [input, handleInputChange] = useInputChange()
     const handleCardClick = (e) => {
         props.socket.emit('endTurn', props.team)
     }
 
-    const handleClueClick = () => {
-      props.sendClue(input.clueNumber)
-    }
+    // const handleClueClick = () => {
+    //   props.sendClue(input.clueNumber)
+    // }
 
     const renderClueInputs = (team) => {
 
-      if(props.showClueInputs && props.activeTeam === props.team && props.team === team && props.isSpyMaster){
-        return(
-          <InputContainer>
-            <StyledInput type="number" placeholder="Clue Number" name="clueNumber" value={input.clueNumber || 0} onChange={handleInputChange}/>
-            <StyledButton color={props.activeTeam} onClick={handleClueClick}>Submit Clue</StyledButton>
-          </InputContainer>
-        )
-      }else if(props.activeTeam === team && props.guessesRemaining > 0){
+      // if(props.showClueInputs && props.activeTeam === props.team && props.team === team && props.isSpyMaster){
+      //   return(
+          
+      //     <InputContainer>
+      //       <StyledInput type="number" placeholder="Clue Number" name="clueNumber" value={input.clueNumber || 0} onChange={handleInputChange}/>
+      //       <StyledButton color={props.activeTeam} onClick={handleClueClick}>Submit Clue</StyledButton>
+      //     </InputContainer>
+      //   )
+      //}else 
+      if(props.activeTeam === team){ //&& props.guessesRemaining > 0){
         return (
-          <>
-            <h3>Guesses Left: {props.guessesRemaining}</h3>
-            <h3>Cards Left{props.cardsRemaining.blue}</h3>
-          </>
+         // <>
+           // <h3>Guesses Left: {props.guessesRemaining}</h3>
+            <h3>Cards Left{props.cardsRemaining[team]}</h3>
+          //</>
         )
       }
-      else if(!isOtherTeamActive('blue') && !isOtherTeamActive('red')){
-        return ''
-      }else if(props.activeTeam === team){
-        return <div>Waiting for Spy Master...</div>
-      }
+      // else if(!isOtherTeamActive('blue') && !isOtherTeamActive('red')){
+      //   return ''
+      // }else if(props.activeTeam === team){
+      //   return <div>Waiting for Spy Master...</div>
+      // }
     }
 
     const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
