@@ -18,8 +18,11 @@ const CipherIdentity = {
 }
 
 export default function WordCard(props) {
-    const [adjustedFontSize, setAdjustedFontSize] = useState(3);
+    const [wordDivFontSize, setWordDivFontSize] = useState(3);
+
     const wordDiv = useRef(null);
+    const revealDiv = useRef(null);
+
     const handleCardClick = (e) => {
         props.socket.emit('updateBoard', props.cardData.word)
     }
@@ -28,27 +31,25 @@ export default function WordCard(props) {
         props.socket.emit('changeSelection', props.cardData.word)
     }
 
-    const renderSelections = () => props.spies.map(spy => spy.spyName)
+    const renderSelections = () => props.spies.map(spy => <PlayerDiv color={props.activeTeam}>{spy.spyName}</PlayerDiv>)
 
     const renderReveal = () => {
-        props.spies.map(spy => console.log(spy.spyName === props.spyName && props.cardData.identity === 0))
-        return props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton color='green' onClick={handleCardClick}>REVEAL</StyledButton> : '')
+        return props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton ref={revealDiv} color='green' onClick={handleCardClick}>TAP TO REVEAL</StyledButton> : '')
     }
 
     const checkFontsize = () => {
         if(wordDiv.current.scrollWidth > wordDiv.current.clientWidth){
-            setAdjustedFontSize(adjustedFontSize - 0.25)
+            setWordDivFontSize(wordDivFontSize - 0.25)
         }
     }
 
-    useEffect(() => {
-        console.log("hello")
+    useEffect(() => { 
         checkFontsize()
-    }, [adjustedFontSize]);
+    }, [wordDivFontSize, props.cardData.word]);
 
     useEffect(() => {
         function handleResize() {
-            setAdjustedFontSize(3)
+            setWordDivFontSize(3)
             checkFontsize()
         }
        
@@ -61,7 +62,7 @@ export default function WordCard(props) {
 
 
     return (
-        <ContainerDiv  onClick={handleClick} fontSize={adjustedFontSize}>
+        <ContainerDiv  onClick={handleClick} fontSize={wordDivFontSize}>
             <SelectionsDiv> {renderSelections()} </SelectionsDiv>
             <StyledCard value={1} className='Word' selected={props.spies.length > 0} team={props.activeTeam}  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
                 <div style={{height:'19%'}}></div>
@@ -75,19 +76,31 @@ export default function WordCard(props) {
 const ContainerDiv = styled.div`
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: stretch;
+    align-items: stretch;
     box-sizing: border-box;
     justify-self: stretch;
-    padding: 0px 2px 0px 2px;
+    padding: 0px 7.5px 7.5px 7.5px;
     overflow: hidden;
     font-size: ${props => props.fontSize}vh;
 `
 
 const SelectionsDiv = styled.div`
-    height: 15px;
-    width: 100%;
 
+    height: 20%;
+    width: 100%;
+    font-size:2.5vh;
+    margin-bottom: 2px;
+`
+
+const PlayerDiv = styled.div`
+    background: ${props => props.color};
+
+   color: white; 
+   display: inline-block; 
+   padding: 0px 2px 0px 2px; 
+   margin: 0px 2px 0px 2px;
+   border-radius: 3px;
 `
 
 const StyledCard = styled.div`
@@ -97,7 +110,7 @@ const StyledCard = styled.div`
     text-align: center;
     box-sizing: border-box;
     align-self: stretch;
-    justify-self: stretch;
+    overflow: hidden;
     width: 100%;
     max-height: 20vw;
 
@@ -105,25 +118,20 @@ const StyledCard = styled.div`
     border: 1px solid ${props => props.selected ? props.team:'transparant'};
 
     border-radius: 5px;
-    box-shadow: 5px 5px hsl(60, 10%, 80%);
+    box-shadow: 5px 5px 2.5px hsl(60, 10%, 80%);
     user-select: none;
-    overflow: hidden;
-
 `;
 
 // const StyledButton = styled.button`
 
 //     left:${props => props.value *40}px;
 // `;
-const StyledButton = styled.button`
-
-    width: 80%;
-    margin: auto;
-    box-sizing: border-box;
-    background: ${props => props.color};
-    outline: none;
-    border: none;
-    border-radius: 10px;
+// font-size: ${props => props.fontSize}vh;
+const StyledButton = styled.div`
+    font-size: 2vw;
+    color: hsl(0, 5%, 80%);
+    font-weight: bold;
+    width: 100%;
     height: 40%;
-    font-size: 1.5vh;
 `
+// background: ${props => props.color};

@@ -85,7 +85,7 @@ export default function Board(props) {
 
 const StyledBoard = styled.div`
   display: grid;
-  padding-top: 60px;
+  padding-top: 5vh;
   grid-template-columns: 1fr;
   justify-items: stretch;
   background: white;
