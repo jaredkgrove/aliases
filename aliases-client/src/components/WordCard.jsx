@@ -45,7 +45,12 @@ export default function WordCard(props) {
 
     useEffect(() => { 
         checkFontsize()
-    }, [wordDivFontSize, props.cardData.word]);
+    }, [wordDivFontSize]);
+
+    useEffect(() => { 
+        setWordDivFontSize(3)
+        checkFontsize()
+    }, [props.cardData.word]);
 
     useEffect(() => {
         function handleResize() {
@@ -67,6 +72,7 @@ export default function WordCard(props) {
             <StyledCard value={1} className='Word' selected={props.spies.length > 0} team={props.activeTeam}  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
                 <div style={{height:'19%'}}></div>
                 <div ref={wordDiv} style={{height:'40%'}}>{props.cardData.word}</div>
+                {/* <img style={{display:'block'}} height='100' width='100' src={props.cardData.word} alt=""/> */}
                 {renderReveal()}
             </StyledCard>
         </ContainerDiv>

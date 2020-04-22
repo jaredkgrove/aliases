@@ -3,6 +3,7 @@ const path = require('path');
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
+const axios = require('axios')
 
 const socketIo = require("socket.io");
 
@@ -23,15 +24,26 @@ const getSpyRoom = (roomName) => io.sockets.adapter.rooms[roomName+'-spymasters'
 //SPY MASTERS
 const getTeamSpyMaster = (roomName, teamColor) => getSpies(roomName).find(spy => spy.isSpyMaster && spy.team === teamColor)//io.sockets.adapter.rooms[roomName+teamColor].spyMaster
 //const setTeamSpyMaster = (roomName, teamColor, socket) => getSpyRoom(roomName).spyMasters[teamColor] = socket
+const setGifBoard = (roomName, newBoard) => getRoom(roomName).gifBoard = newBoard
 
 //BOARD
 const getBoard = (roomName) => getRoom(roomName).gameBoard
 const setBoard = (roomName, newBoard) => getRoom(roomName).gameBoard = newBoard
 const getWord = (roomName, index) => getBoard(roomName)[index].word
 const getWordIndex = (roomName, word) => getBoard(roomName).findIndex(card => card.word === word)
-const initializeBoard = (roomName) => {
+const initializeBoard = async (roomName) => {
+
   let newBoard = generateRandomGameBoard(words, 25).map((word, i) =>  ({word: word, identity: IdentityEnum.HIDDEN}))
   setBoard(roomName, newBoard)
+  // let gifArray = []
+  // for(i = 0; i <= 24; i++){
+  //   let giftest = await getGifs()
+  //   // gifArray.push(giftest.data.data.url)
+  //   getRoom(roomName).gameBoard[i].word = giftest.data.data.images.fixed_height.url
+  //   console.log(giftest.data.data.images.fixed_height.url)
+  // }
+
+
 }
 
 //CIPHER
@@ -186,6 +198,14 @@ const handleEndTurn = (roomName) => {
   console.log("Clue Propmpted")
 
 }
+
+const getGifs = async () => {
+  try {
+    return await axios.get('https://api.giphy.com/v1/gifs/random?api_key=Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV&tag=&rating=PG')
+  } catch (error) {
+    console.error(error)
+  }
+}//Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV
 
 io.on("connection", socket => {
 
