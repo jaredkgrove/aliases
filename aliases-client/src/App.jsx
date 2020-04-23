@@ -25,8 +25,6 @@ function App () {
   }
 
     return (
-      <Layout>
-        <meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86"></meta>
         <Switch>
           <Route exact path="/">
             <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin>
@@ -35,7 +33,6 @@ function App () {
           {!spyName ? <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin> : <Board socket={socket} io={io} spyMaster={spyMaster} spyName={spyName} game={game} team={team}/>}
           </Route>
         </Switch>
-      </Layout>
     );
 }
 
@@ -46,4 +43,6 @@ const Layout = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
+
+
 `;

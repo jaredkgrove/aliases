@@ -45,13 +45,13 @@ export default function BoardHeader(props) {
     return (
 
       <StyledHeader color={props.activeTeam}>
-        <TeamDiv color={`hsl(217, 100%, 84%)`} active={!isOtherTeamActive('red')}>
-          <SpyMasterDiv>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>
+        <TeamDiv team={'blue'} color={`hsl(217, 100%, 84%)`} active={!isOtherTeamActive('red')}>
+          <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {/* {renderClueInputs('blue')} */}
           {renderEndTurnButton('blue')}
         </TeamDiv>
-        <TeamDiv color={`hsl(0, 100%, 84%)`} active={!isOtherTeamActive('blue')}>
-          <SpyMasterDiv>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
+        <TeamDiv team={'red'} color={`hsl(0, 100%, 90%)`} active={!isOtherTeamActive('blue')}>
+          <SpyMasterDiv color={`hsl(0, 100%, 90%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {/* <div>{props.cardsRemaining.red}</div> */}
           {/* {renderClueInputs('red')} */}
           {renderEndTurnButton('red')}
@@ -68,18 +68,18 @@ const TeamDiv = styled.div`
   display: ${props => props.active ? "block":"none"};
   flex: ${props => props.active ? 1:0};
 
-  background: ${props => props.color};
+  background: ${props => props.team};
   > * {
     display: inline-block;
   }
-  box-shadow: 0px 5px 1.5px  ${props => props.color};
+  box-shadow: 0px 5px 2.5px  ${props => props.team};
 `
 
 const SpyMasterDiv = styled.div`
   text-align: center;
   font-size: 4vh;
   height: 100%;
-
+  color:${props => props.color}
 `
 
 const StyledInput = styled.input`
@@ -98,7 +98,7 @@ const InputContainer = styled.div`
   right: 0px;
   box-sizing: border-box;
   background-clip: content-box;
-  padding: 5px;
+
   height: 100%;
 
 

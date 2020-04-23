@@ -27,9 +27,9 @@ const StyledCardGrid = styled.div`
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
 
- 
+
   justify-items: center;
-  background: white;
+
 `;
 
 

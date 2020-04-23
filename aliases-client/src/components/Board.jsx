@@ -90,9 +90,10 @@ const StyledBoard = styled.div`
   justify-items: stretch;
   background: white;
   box-sizing: border-box;
-  height: calc(100vh - 16px);
+  height: 100%;
   max-width: 100vw;
   overflow: hidden;
+  background: transparent;
 `;
 
 // const [isDragging, setIsDragging] = useState(0)

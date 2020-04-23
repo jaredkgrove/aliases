@@ -18,7 +18,7 @@ export default function WordCard(props) {
 
     return (
       <AbsoluteContainer  >
-          <h3>Join Room</h3>
+          <h3 style={{color:'hsl(217, 5%, 80%)'}}>Join Room</h3>
           <StyledInput type="text"  placeholder="Room Name" name="room" value ={input.room || ''} onChange={handleInputChange}/>
           <StyledInput type="text" name="spyName" placeholder="Alias" alue={input.spyName || ''} onChange={handleInputChange}/>
           <div>
@@ -39,7 +39,7 @@ const AbsoluteContainer = styled.div`
     left:50vw;
     top: 50vh;
     transform: translate(-50%, -50%);
-    background: hsl(217, 5%, 80%);
+    background: hsl(217, 25%, 10%);
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -62,12 +62,13 @@ const StyledInput = styled.input`
 const StyledLink = styled(Link)`
   background: ${props => props.color};
     padding: 10px;
-    color: white;
+
     font-weight: bold;
   text-decoration: none;
   border: none;
   border-radius: 5px;
   height: 100%;
+  color: hsl(217, 5%, 90%);
 `
 
 const StyledLabel = styled.div`
@@ -76,6 +77,7 @@ const StyledLabel = styled.div`
     display: inline-block;
     margin: 5px;
 
+    color: hsl(217, 5%, 80%);
 
 
     height: 35px;

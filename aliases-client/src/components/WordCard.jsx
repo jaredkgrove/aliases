@@ -101,12 +101,11 @@ const SelectionsDiv = styled.div`
 
 const PlayerDiv = styled.div`
     background: ${props => props.color};
-
-   color: white; 
-   display: inline-block; 
-   padding: 0px 2px 0px 2px; 
-   margin: 0px 2px 0px 2px;
-   border-radius: 3px;
+    color: white; 
+    display: inline-block; 
+    padding: 0px 2px 0px 2px; 
+    margin: 0px 2px 0px 2px;
+    border-radius: 3px;
 `
 
 const StyledCard = styled.div`
@@ -121,11 +120,11 @@ const StyledCard = styled.div`
     max-height: 20vw;
 
     background: ${props => props.color};
-    border: 1px solid ${props => props.selected ? props.team:'transparant'};
 
     border-radius: 5px;
-    box-shadow: 5px 5px 2.5px hsl(60, 10%, 80%);
-    user-select: none;
+    box-shadow: ${props => props.selected ? `${props.team === 'blue' ? '5px 5px 2.5px hsl(217, 80%, 80%)':'5px 5px 2.5px hsl(0, 80%, 80%)'}`:''};
+
+    user-select: none; 
 `;
 
 // const StyledButton = styled.button`
