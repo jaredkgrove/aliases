@@ -42,7 +42,7 @@ export default function BoardHeader(props) {
 
     const renderEndTurnButton = (team) => {
      console.log(props)
-      return (props.blueSpyMaster && props.redSpyMaster && team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
+      return (props.blueSpyMaster && props.redSpyMaster && team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam === 'blue' ? 'hsl(217, 100%, 84%)':'hsl(0, 100%, 84%)'} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
     }
     return (
  
@@ -53,7 +53,7 @@ export default function BoardHeader(props) {
           {renderEndTurnButton('blue')}
         </TeamDiv>
         <TeamDiv team={'red'} color={`hsl(0, 100%, 50%)`} active={!isOtherTeamActive('blue')}>
-          <SpyMasterDiv color={`hsl(0, 100%, 90%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
+          <SpyMasterDiv color={`hsl(0, 100%, 84%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {/* <div>{props.cardsRemaining.red}</div> */}
           {/* {renderClueInputs('red')} */}
           {renderEndTurnButton('red')}
@@ -108,7 +108,7 @@ const InputContainer = styled.div`
 
 const StyledButton = styled.button`
   box-sizing: border-box;
-  padding: 5px;
+  padding: 0.5vh;
   background: ${props => props.color};
   background-clip: content-box;
   outline: none;
