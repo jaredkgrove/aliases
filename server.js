@@ -10,8 +10,8 @@ const socketIo = require("socket.io");
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 const {words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
-// app.use(index);
-app.use(express.static(path.join(__dirname, 'aliases-client/build')));
+app.use(index);
+// app.use(express.static(path.join(__dirname, 'aliases-client/build')));
 const io = socketIo(server); // < Interesting!
 
 //Encapsulated objects... sort of
@@ -31,7 +31,7 @@ const getBoard = (roomName) => getRoom(roomName).gameBoard
 const setBoard = (roomName, newBoard) => getRoom(roomName).gameBoard = newBoard
 const getWord = (roomName, index) => getBoard(roomName)[index].word
 const getWordIndex = (roomName, word) => getBoard(roomName).findIndex(card => card.word === word)
-const initializeBoard = async (roomName) => {
+const initializeBoard = (roomName) => {
 
   let newBoard = generateRandomGameBoard(words, 25).map((word, i) =>  ({word: word, identity: IdentityEnum.HIDDEN}))
   setBoard(roomName, newBoard)
@@ -52,7 +52,9 @@ const setCipher = (roomName, newCipher) => getRoom(roomName).cipher = newCipher
 const getCipherCard = (roomName, word) => getCipher(roomName).find(card => card.word === word)
 
 const initializeCipher = (roomName) => {
-  let newCipher = generateRandomGameBoard(getBoard(roomName), 25).map((card, i) => ({word: card.word, identity:blueFirstCipher[i].identity, revealed: false}))
+  let startingTeam = Math.random() >= 0.5 ? 'blue':'red'
+  setStartingTeam(roomName, startingTeam)
+  let newCipher = generateRandomGameBoard(getBoard(roomName), 25).map((card, i) => ({word: card.word, identity: startingTeam === 'blue'? blueFirstCipher[i].identity:redFirstCipher[i].identity, revealed: false}))
   setCipher(roomName, newCipher)
 }
 const getCipherIdentity = (roomName, word) => getCipher(roomName).find(card => card.word === word).identity
@@ -60,12 +62,12 @@ const getCipherIdentity = (roomName, word) => getCipher(roomName).find(card => c
 //TEAMS
 const getCurrentTeamColor = (roomName) => getRoom(roomName).currentTurnTeam
 const setCurrentTeam = (roomName, teamColor) => getRoom(roomName).currentTurnTeam = teamColor
-const setStartingTeam = (roomName) => {
-  setCurrentTeam(roomName, 'blue')
+const setStartingTeam = (roomName, teamColor) => {
+  setCurrentTeam(roomName, teamColor)
 }
 
 //SPIES
-const getSpies = (roomName) => getRoom(roomName).spies
+const getSpies = (roomName) => getRoom(roomName) ? getRoom(roomName).spies:[]
 const initializeSpies = (roomName) => getRoom(roomName).spies = []
 const setSpies = (roomName, newSpyData) => getRoom(roomName).spies = newSpyData
 const addSpy = (roomName, spyData) => getSpies(roomName).push(spyData)
@@ -76,34 +78,48 @@ const getIdentityString = (identity) => Object.keys(IdentityEnum)[identity].toLo
 
 //const decrementGuessesRemaining = (roomName) => getRoom(roomName).guessesRemaining-=1
 
-const addSpyToTeam = (roomName, teamColor, spyName, spyMaster) => {
+const addSpyToTeam = (roomName, teamColor, spyName, spyMaster, duplicateInt = 0) => {
   if(!getSpies(roomName)){
     initializeSpies(roomName)
   }
+
   if(!getSpy(roomName, spyName)){
     addSpy(roomName, {spyName: spyName, cardSelection: getWord(roomName, 0), team: teamColor, isSpyMaster: spyMaster})
+    return spyName
+  }else{
+    duplicateInt++
+    return addSpyToTeam(roomName, teamColor, `${spyName}${duplicateInt}`, spyMaster, duplicateInt)
   }
 }
 
-const joinGame = (socket, roomName, teamColor, spyName, spyMaster) => {
+const isInGame = (socket, roomName) => {
+  if(getRoom(roomName)){
+    return getRoom(roomName).sockets[socket.id]
+  } else{
+    return false
+  }
+}
+
+const joinGame = (socket, roomName, teamColor, spyMaster) => {
   socket.join(roomName)
   if(!getRoom(roomName).spies){
     getRoom(roomName).spies = []
     //getRoom(roomName).guessesRemaining = 0
   }
   // socket.join(roomName + teamColor)
+  socket.spyMaster = false
   if(spyMaster && !getTeamSpyMaster(roomName, teamColor)){
     socket.join(roomName + "-spymasters")
+    socket.spyMaster = true
   }
-
-  socket.spyName = spyName
+  
   socket.roomName = roomName
   socket.teamColor = teamColor
 }
 
 const initializeGame = (roomName) => {
   initializeBoard(roomName)
-  setStartingTeam(roomName)
+
   initializeCipher(roomName)
 }
 
@@ -213,16 +229,18 @@ io.on("connection", socket => {
 
     firstPlayer = !getRoom(roomName)
 
-    joinGame(socket, roomName, teamColor, spyName, spyMaster)
+    if(!isInGame(socket, roomName)){
+      joinGame(socket, roomName, teamColor, spyMaster)
 
-    if(firstPlayer){initializeGame(roomName)}
+      if(firstPlayer){initializeGame(roomName)}
 
-    addSpyToTeam(roomName, teamColor, spyName, spyMaster)
-
+      socket.spyName = addSpyToTeam(roomName, teamColor, spyName, socket.spyMaster)
+    }
+    socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: socket.spyMaster, roomName: roomName, teamColor: teamColor})
     sendBoard(roomName)
     sendSpies(roomName)
     sendCurrentTeam(roomName)
-
+    console.log(getRoom(roomName))
   })
 
   socket.on('updateBoard', (word) => {
@@ -281,7 +299,7 @@ io.on("connection", socket => {
     //{
       let i = getSpyIndex(socket.roomName, socket.spyName)
       let oldSpiesData = getSpies(socket.roomName)
-      let spyMaster = getTeamSpyMaster(socket.roomName,socket.teamColor)
+      let spyMaster = getTeamSpyMaster(socket.roomName, socket.teamColor)
       let newSpiesData = [...oldSpiesData.slice(0, i), {spyName: socket.spyName, cardSelection: word, team: socket.teamColor, isSpyMaster: (spyMaster && (spyMaster.spyName === socket.spyName))}, ...oldSpiesData.slice(i+1)]
       setSpies(socket.roomName, newSpiesData)
   

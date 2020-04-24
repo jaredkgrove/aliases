@@ -45,12 +45,12 @@ export default function BoardHeader(props) {
     return (
 
       <StyledHeader color={props.activeTeam}>
-        <TeamDiv team={'blue'} color={`hsl(217, 100%, 84%)`} active={!isOtherTeamActive('red')}>
+        <TeamDiv team={'blue'} color={`hsl(217, 100%, 50%)`} active={!isOtherTeamActive('red')}>
           <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {/* {renderClueInputs('blue')} */}
           {renderEndTurnButton('blue')}
         </TeamDiv>
-        <TeamDiv team={'red'} color={`hsl(0, 100%, 90%)`} active={!isOtherTeamActive('blue')}>
+        <TeamDiv team={'red'} color={`hsl(0, 100%, 50%)`} active={!isOtherTeamActive('blue')}>
           <SpyMasterDiv color={`hsl(0, 100%, 90%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
           {/* <div>{props.cardsRemaining.red}</div> */}
           {/* {renderClueInputs('red')} */}
@@ -68,11 +68,11 @@ const TeamDiv = styled.div`
   display: ${props => props.active ? "block":"none"};
   flex: ${props => props.active ? 1:0};
 
-  background: ${props => props.team};
+  background: ${props => props.color};
   > * {
     display: inline-block;
   }
-  box-shadow: 0px 5px 2.5px  ${props => props.team};
+  box-shadow: 0px 5px 2.5px  ${props => props.color};
 `
 
 const SpyMasterDiv = styled.div`

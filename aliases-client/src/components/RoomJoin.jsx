@@ -18,6 +18,7 @@ export default function WordCard(props) {
 
     return (
       <AbsoluteContainer  >
+        {console.log(props.socket)}
           <h3 style={{color:'hsl(217, 5%, 80%)'}}>Join Room</h3>
           <StyledInput type="text"  placeholder="Room Name" name="room" value ={input.room || ''} onChange={handleInputChange}/>
           <StyledInput type="text" name="spyName" placeholder="Alias" alue={input.spyName || ''} onChange={handleInputChange}/>

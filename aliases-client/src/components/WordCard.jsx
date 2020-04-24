@@ -11,9 +11,9 @@ const Identity = {
 
 const CipherIdentity = {
     0: 'hsl(217, 5%, 95%)',
-    1: 'hsl(217, 100%, 84%)',
-    2: 'hsl(0, 100%, 84%)',
-    3: 'hsl(48, 100%, 84%)',
+    1: 'hsl(217, 30%, 75%)',
+    2: 'hsl(0, 30%, 75%)',
+    3: 'hsl(48, 30%, 75%)',
     4: 'hsl(0, 0%, 60%)'
 }
 
@@ -69,7 +69,7 @@ export default function WordCard(props) {
     return (
         <ContainerDiv  onClick={handleClick} fontSize={wordDivFontSize}>
             <SelectionsDiv> {renderSelections()} </SelectionsDiv>
-            <StyledCard value={1} className='Word' selected={props.spies.length > 0} team={props.activeTeam}  color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
+            <StyledCard value={1} className='Word' selected={props.spies.length > 0} team={props.activeTeam}  cipherColor={props.cipherData && !props.cipherData.revealed ? Identity[props.cipherData.identity]:null} color={props.cipherData && !props.cipherData.revealed ? CipherIdentity[props.cipherData.identity]:Identity[props.cardData.identity]} >
                 <div style={{height:'19%'}}></div>
                 <div ref={wordDiv} style={{height:'40%'}}>{props.cardData.word}</div>
                 {/* <img style={{display:'block'}} height='100' width='100' src={props.cardData.word} alt=""/> */}
@@ -100,7 +100,7 @@ const SelectionsDiv = styled.div`
 `
 
 const PlayerDiv = styled.div`
-    background: ${props => props.color};
+    background: ${props => props.color === 'blue' ? 'hsl(217, 100%, 50%)':'hsl(0, 100%, 50%)'};
     color: white; 
     display: inline-block; 
     padding: 0px 2px 0px 2px; 
@@ -120,9 +120,9 @@ const StyledCard = styled.div`
     max-height: 20vw;
 
     background: ${props => props.color};
-
-    border-radius: 5px;
-    box-shadow: ${props => props.selected ? `${props.team === 'blue' ? '5px 5px 2.5px hsl(217, 80%, 80%)':'5px 5px 2.5px hsl(0, 80%, 80%)'}`:''};
+    border: ${props => props.cipherColor ? `5px solid ${props.cipherColor}`:'' };
+    border-radius: 10px;
+    box-shadow: ${props => props.selected ? `${props.team === 'blue' ? '0 0 10px 5px hsl(217, 80%, 80%)':'0 0 10px 5px hsl(0, 80%, 80%)'}`:''};
 
     user-select: none; 
 `;
