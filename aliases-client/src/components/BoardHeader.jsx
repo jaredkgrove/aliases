@@ -40,10 +40,12 @@ export default function BoardHeader(props) {
 
     const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
 
-    const renderEndTurnButton = (team) => (props.blueSpyMaster && props.redSpyMaster && team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
-
+    const renderEndTurnButton = (team) => {
+     console.log(props)
+      return (props.blueSpyMaster && props.redSpyMaster && team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
+    }
     return (
-
+ 
       <StyledHeader color={props.activeTeam}>
         <TeamDiv team={'blue'} color={`hsl(217, 100%, 50%)`} active={!isOtherTeamActive('red')}>
           <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>

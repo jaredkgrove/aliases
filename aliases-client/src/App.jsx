@@ -23,7 +23,7 @@ function App () {
     console.log(data)
     setGame(data.roomName)
     setTeam(data.teamColor)
-    setSpyMaster(data.spymaster)
+    setSpyMaster(data.spyMaster)
     setSpyName(data.spyName)
   }
   useEffect(() => {
