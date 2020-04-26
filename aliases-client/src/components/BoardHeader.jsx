@@ -8,9 +8,14 @@ export default function BoardHeader(props) {
         props.socket.emit('endTurn', props.team)
     }
 
+    const handleBecomeSpymaster = (team) => {
+      props.socket.emit('becomeSpymaster', team)
+  }
+
     // const handleClueClick = () => {
     //   props.sendClue(input.clueNumber)
     // }
+    const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
 
     const renderClueInputs = (team) => {
 
@@ -38,22 +43,34 @@ export default function BoardHeader(props) {
       // }
     }
 
-    const isOtherTeamActive = (teamColor) => props.blueSpyMaster && props.redSpyMaster && props.activeTeam === teamColor
+    const renderSpyMaster = (team, spymaster) => {
+      if(spymaster){
+        return <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {spymaster.spyName}</SpyMasterDiv>
+      }else if(team === props.team){
+        return <BecomeSpyMaster onClick={() => handleBecomeSpymaster(team)}>Tap To Be Spymaster</BecomeSpyMaster>
+      }else{
+        return <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: ...</SpyMasterDiv>
+      }
+
+    }
+
 
     const renderEndTurnButton = (team) => {
-     console.log(props)
       return (props.blueSpyMaster && props.redSpyMaster && team === props.team && !props.isSpyMaster) ? <InputContainer><StyledButton color={props.activeTeam === 'blue' ? 'hsl(217, 100%, 84%)':'hsl(0, 100%, 84%)'} onClick={handleCardClick}>End Turn</StyledButton></InputContainer>:''
     }
     return (
  
       <StyledHeader color={props.activeTeam}>
         <TeamDiv team={'blue'} color={`hsl(217, 100%, 50%)`} active={!isOtherTeamActive('red')}>
-          <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv>
+          {renderSpyMaster('blue', props.blueSpyMaster)}
+          {/* <SpyMasterDiv color={`hsl(217, 100%, 84%)`}>Spymaster: {`${props.blueSpyMaster ? props.blueSpyMaster.spyName : "..."}`}</SpyMasterDiv> */}
           {/* {renderClueInputs('blue')} */}
           {renderEndTurnButton('blue')}
         </TeamDiv>
         <TeamDiv team={'red'} color={`hsl(0, 100%, 50%)`} active={!isOtherTeamActive('blue')}>
-          <SpyMasterDiv color={`hsl(0, 100%, 84%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv>
+          {renderSpyMaster('red',  props.redSpyMaster)}
+
+          {/* <SpyMasterDiv color={`hsl(0, 100%, 84%)`}>Spymaster: {`${props.redSpyMaster ? props.redSpyMaster.spyName : "..."}`}</SpyMasterDiv> */}
           {/* <div>{props.cardsRemaining.red}</div> */}
           {/* {renderClueInputs('red')} */}
           {renderEndTurnButton('red')}
@@ -74,14 +91,36 @@ const TeamDiv = styled.div`
   > * {
     display: inline-block;
   }
-  box-shadow: 0px 5px 2.5px  ${props => props.color};
+  box-shadow: 0 0 2.5px 5px ${props => props.color};
 `
 
 const SpyMasterDiv = styled.div`
-  text-align: center;
-  font-size: 4vh;
+  width: 100%;
   height: 100%;
-  color:${props => props.color}
+  font-size: 4vh;
+  text-align: center;
+  font-weight:bold;
+  color: hsl(0, 5%, 90%);
+  @media (max-width: 500px) {
+    text-align: left;
+    font-size: 2vh;
+    line-height:5.5vh;
+
+  }
+`
+
+const BecomeSpyMaster = styled.div`
+  width: 100%;
+  height: 100%;
+  font-size: 4vh;
+  text-align: center;
+  font-weight:bold;
+  color: hsl(0, 5%, 90%);
+  @media (max-width: 500px) {
+    text-align: left;
+    font-size: 2vh;
+    line-height:5.5vh;
+  }
 `
 
 const StyledInput = styled.input`
@@ -99,22 +138,24 @@ const InputContainer = styled.div`
   position: absolute;
   right: 0px;
   box-sizing: border-box;
-  background-clip: content-box;
-
-  height: 100%;
-
-
+  height: calc(5vh + 5px);
+  min-width: 25%;
 `
 
-const StyledButton = styled.button`
-  box-sizing: border-box;
-  padding: 0.5vh;
+const StyledButton = styled.div`
   background: ${props => props.color};
-  background-clip: content-box;
+  font-size: 4vh;
   outline: none;
   border: none;
   border-radius: 10px;
   height: 100%;
+  width: 100%;
+  text-align:center;
+  font-weight:bold;
+  @media (max-width: 500px) {
+    font-size: 2vh;
+    line-height:5.5vh;
+  }
 `
 
 const StyledHeader = styled.div`

@@ -6,7 +6,7 @@ import BoardHeader from './BoardHeader'
 // import IndentityCardsContainer from './IndentityCardsContainer'
 export default function Board(props) {
   //const [wordCardPropsArray, setWordCardPropsArray] = useState(initialArray);
-  const [cardArray, setCardArray] = useState([{word:"hi"}])
+  const [cardArray, setCardArray] = useState([{word:"Something Is Wrong"}])
   const [cipher, setCipher] = useState([{}])
   const [spies, setSpies] = useState([{}])
   const [activeTeam, setActiveTeam] = useState('')

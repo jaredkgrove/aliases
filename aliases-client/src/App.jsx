@@ -9,20 +9,20 @@ import Board from './components/Board'
 import RoomJoin from './components/RoomJoin'
 import styled from 'styled-components'
 // const socket = io("localhost:4001")
-const socket = io("https://anonyms.herokuapp.com/");
+const socket = io("https://anonyms.herokuapp.com/game");
 
 function App () {
   const [spyName, setSpyName] = useState('')
   const [spyMaster, setSpyMaster] = useState(false)
   const [game, setGame] = useState('')
   const [team, setTeam] = useState('')
-  const handleGameJoin = (game, team, spymaster, name) => {
-    socket.emit('joinGame', game, team, spymaster, name)
+  const handleGameJoin = (game, team, name) => {
+    socket.emit('joinGame', game, team, name)
   }
   const handleSuccessfulJoin = (data) => {
     console.log(data)
     setGame(data.roomName)
-    setTeam(data.teamColor)
+    setTeam(data.team)
     setSpyMaster(data.spyMaster)
     setSpyName(data.spyName)
   }

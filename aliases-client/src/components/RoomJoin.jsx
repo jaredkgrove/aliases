@@ -12,7 +12,7 @@ export default function WordCard(props) {
         if(!input.room || input.room === ''){
             e.preventDefault()
         }else(
-            props.handleGameJoin(input.room, team, input.spymaster, input.spyName)
+            props.handleGameJoin(input.room, team, input.spyName)
         )       
     };
 
@@ -22,10 +22,10 @@ export default function WordCard(props) {
           <h3 style={{color:'hsl(217, 5%, 80%)'}}>Join Room</h3>
           <StyledInput type="text"  placeholder="Room Name" name="room" value ={input.room || ''} onChange={handleInputChange}/>
           <StyledInput type="text" name="spyName" placeholder="Alias" alue={input.spyName || ''} onChange={handleInputChange}/>
-          <div>
-            <input type="checkbox" name="spymaster" value={input.spymaster || false} onChange={handleInputChange}/>
-            <StyledLabel htmlFor="spymaster">Spy Master</StyledLabel>
-          </div>
+          {/* <div> */}
+            {/* <input type="checkbox" name="spymaster" value={input.spymaster || false} onChange={handleInputChange}/> */}
+            {/* <StyledLabel htmlFor="spymaster">Spy Master</StyledLabel> */}
+          {/* </div> */}
           <div style={{display:'flex', justifyContent:'space-around'}}>
             <StyledLink color='red' to="/game" onClick={(e) => handleJoinRoom(e, 'red')}>Join Red Team</StyledLink>
             <StyledLink color='blue' to="/game" onClick={(e) => handleJoinRoom(e, 'blue')}>Join Blue Team</StyledLink>
@@ -40,7 +40,7 @@ const AbsoluteContainer = styled.div`
     left:50vw;
     top: 50vh;
     transform: translate(-50%, -50%);
-    background: hsl(217, 25%, 10%);
+    background: hsl(217, 5%, 35%);
     display: flex;
     flex-direction: column;
     padding: 20px;

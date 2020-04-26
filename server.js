@@ -10,8 +10,8 @@ const socketIo = require("socket.io");
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 const {words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
-app.use(index);
-// app.use(express.static(path.join(__dirname, 'aliases-client/build')));
+// app.use(index);
+app.use(express.static(path.join(__dirname, 'aliases-client/build')));
 const io = socketIo(server); // < Interesting!
 
 //Encapsulated objects... sort of
@@ -23,8 +23,17 @@ const getSpyRoom = (roomName) => io.sockets.adapter.rooms[roomName+'-spymasters'
 
 //SPY MASTERS
 const getTeamSpyMaster = (roomName, teamColor) => getSpies(roomName).find(spy => spy.isSpyMaster && spy.team === teamColor)//io.sockets.adapter.rooms[roomName+teamColor].spyMaster
+const setSpymaster = (roomName, teamColor, socket) => {
+  socket.spyMaster = false
+  if(!getTeamSpyMaster(roomName, teamColor)){
+    getSpies(roomName).find(spy => spy.spyName === socket.spyName && spy.team === socket.teamColor).isSpyMaster = true
+    socket.spyMaster = true
+    socket.join(roomName + "-spymasters")
+  }
+  return socket.spyMaster
+}
 //const setTeamSpyMaster = (roomName, teamColor, socket) => getSpyRoom(roomName).spyMasters[teamColor] = socket
-const setGifBoard = (roomName, newBoard) => getRoom(roomName).gifBoard = newBoard
+// const setGifBoard = (roomName, newBoard) => getRoom(roomName).gifBoard = newBoard
 
 //BOARD
 const getBoard = (roomName) => getRoom(roomName).gameBoard
@@ -32,18 +41,8 @@ const setBoard = (roomName, newBoard) => getRoom(roomName).gameBoard = newBoard
 const getWord = (roomName, index) => getBoard(roomName)[index].word
 const getWordIndex = (roomName, word) => getBoard(roomName).findIndex(card => card.word === word)
 const initializeBoard = (roomName) => {
-
   let newBoard = generateRandomGameBoard(words, 25).map((word, i) =>  ({word: word, identity: IdentityEnum.HIDDEN}))
   setBoard(roomName, newBoard)
-  // let gifArray = []
-  // for(i = 0; i <= 24; i++){
-  //   let giftest = await getGifs()
-  //   // gifArray.push(giftest.data.data.url)
-  //   getRoom(roomName).gameBoard[i].word = giftest.data.data.images.fixed_height.url
-  //   console.log(giftest.data.data.images.fixed_height.url)
-  // }
-
-
 }
 
 //CIPHER
@@ -78,40 +77,40 @@ const getIdentityString = (identity) => Object.keys(IdentityEnum)[identity].toLo
 
 //const decrementGuessesRemaining = (roomName) => getRoom(roomName).guessesRemaining-=1
 
-const addSpyToTeam = (roomName, teamColor, spyName, spyMaster, duplicateInt = 0) => {
+const addSpyToTeam = (roomName, teamColor, spyName, duplicateInt = 0) => {
   if(!getSpies(roomName)){
     initializeSpies(roomName)
   }
 
   if(!getSpy(roomName, spyName)){
-    addSpy(roomName, {spyName: spyName, cardSelection: getWord(roomName, 0), team: teamColor, isSpyMaster: spyMaster})
+    addSpy(roomName, {spyName: spyName, cardSelection: getWord(roomName, 0), team: teamColor, isSpyMaster: false})
     return spyName
   }else{
     duplicateInt++
-    return addSpyToTeam(roomName, teamColor, `${spyName}${duplicateInt}`, spyMaster, duplicateInt)
+    return addSpyToTeam(roomName, teamColor, `${spyName}${duplicateInt}`, false, duplicateInt)
   }
 }
 
 const isInGame = (socket, roomName) => {
+
   if(getRoom(roomName)){
+    console.log(socket.id)
+    console.log(getRoom(roomName).sockets)
     return getRoom(roomName).sockets[socket.id]
   } else{
     return false
   }
 }
 
-const joinGame = (socket, roomName, teamColor, spyMaster) => {
+const joinGame = (socket, roomName, teamColor) => {
+
   socket.join(roomName)
   if(!getRoom(roomName).spies){
     getRoom(roomName).spies = []
     //getRoom(roomName).guessesRemaining = 0
   }
   // socket.join(roomName + teamColor)
-  socket.spyMaster = false
-  if(spyMaster && !getTeamSpyMaster(roomName, teamColor)){
-    socket.join(roomName + "-spymasters")
-    socket.spyMaster = true
-  }
+
   
   socket.roomName = roomName
   socket.teamColor = teamColor
@@ -130,12 +129,11 @@ const sendBoard = (roomName) => {
     if(getTeamSpyMaster(roomName, 'blue') && getTeamSpyMaster(roomName, 'red')){
       io.in(roomName).emit("boardUpdate", io.sockets.adapter.rooms[roomName].gameBoard); // Emitting a new message. It will be consumed by the client
       io.in(roomName+"-spymasters").emit("setCipher", getCipher(roomName)); // Emitting a new message. It will be consumed by the client
-      sendCardRemaining(roomName)
+      // sendCardRemaining(roomName)
       //sendGuessesRemaining(roomName)
     }else{
-      io.in(roomName).emit("boardUpdate", [{word: 'Waiting for SpyMasters to Join Game', team: null, isSpyMaster: null, identity: IdentityEnum.HIDDEN}]); // Emitting a new message. It will be consumed by the client
+      io.in(roomName).emit("boardUpdate", Array(25).fill({word: 'Waiting for SpyMasters...', team: null, isSpyMaster: null, identity: IdentityEnum.HIDDEN})); // Emitting a new message. It will be consumed by the client
       io.in(roomName+"-spymasters").emit("setCipher", [{word: 'Waiting for SpyMasters to Join Game', team: null, isSpyMaster: null, identity: IdentityEnum.HIDDEN}]); // Emitting a new message. It will be consumed by the client
-
     }
 
   } catch (error) {
@@ -173,7 +171,7 @@ const sendCardRemaining = (roomName) => {
 
 const sendSpies = (roomName) => {
   console.log("Spies Sent")
-
+  console.log(getSpies(roomName))
   try {
     io.in(roomName).emit("spiesUpdate", getSpies(roomName))//io.sockets.adapter.rooms[io.sockets.adapter.rooms[room].currentTurnTeam].spies); // Emitting a new message. It will be consumed by the client
   } catch (error) {
@@ -181,17 +179,16 @@ const sendSpies = (roomName) => {
   }
 };
 
-const clearBoard = (roomName) => {
-  try {
-    io.in(roomName).emit("spiesUpdate", getSpies(roomName).filter(spy => spy.isSpyMaster))//io.sockets.adapter.rooms[io.sockets.adapter.rooms[room].currentTurnTeam].spies); // Emitting a new message. It will be consumed by the client
-  } catch (error) {
-    console.error(`Error sendSpies: ${error.code}`);
-  }
-};
+// const clearBoard = (roomName) => {
+//   try {
+//     io.in(roomName).emit("spiesUpdate", getSpies(roomName).filter(spy => spy.isSpyMaster))//io.sockets.adapter.rooms[io.sockets.adapter.rooms[room].currentTurnTeam].spies); // Emitting a new message. It will be consumed by the client
+//   } catch (error) {
+//     console.error(`Error sendSpies: ${error.code}`);
+//   }
+// };
 
 const sendCurrentTeam = (roomName) => {
   console.log("Active Team Sent")
-
   io.in(roomName).emit("startTurn", getCurrentTeamColor(roomName))
 } 
 
@@ -200,7 +197,7 @@ const switchCurrentTeam = (roomName) => {
 
   getCurrentTeamColor(roomName) === 'blue' ? setCurrentTeam(roomName, 'red') : setCurrentTeam(roomName, 'blue')
   //getRoom(roomName).guessesRemaining = 0
-  clearBoard(roomName)
+  // clearBoard(roomName)
   sendSpies(roomName)
   sendCurrentTeam(roomName)
 }
@@ -210,37 +207,50 @@ const handleEndTurn = (roomName) => {
 
   switchCurrentTeam(roomName)
 
-  //io.in(roomName+"-spymasters").emit("promptForClue", true); // Emitting a new message. It will be consumed by the client
   console.log("Clue Propmpted")
 
 }
 
-const getGifs = async () => {
-  try {
-    return await axios.get('https://api.giphy.com/v1/gifs/random?api_key=Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV&tag=&rating=PG')
-  } catch (error) {
-    console.error(error)
-  }
-}//Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV
+// const getGifs = async () => {
+//   try {
+//     return await axios.get('https://api.giphy.com/v1/gifs/random?api_key=Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV&tag=&rating=PG')
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }//Q0dyd4K1CCkFUINpMJet4h4FxRJmaAUV
 
 io.on("connection", socket => {
 
-  socket.on('joinGame', (roomName, teamColor, spyMaster, spyName) => {
+  socket.on('joinGame', (roomName, teamColor, spyName) => {
+    if(spyName && roomName && teamColor){
+      firstPlayer = !getRoom(roomName)
 
-    firstPlayer = !getRoom(roomName)
-
-    if(!isInGame(socket, roomName)){
-      joinGame(socket, roomName, teamColor, spyMaster)
-
-      if(firstPlayer){initializeGame(roomName)}
-
-      socket.spyName = addSpyToTeam(roomName, teamColor, spyName, socket.spyMaster)
+      if(!isInGame(socket, roomName)){
+        joinGame(socket, roomName, teamColor)
+  
+        if(firstPlayer){initializeGame(roomName)}
+  
+        socket.spyName = addSpyToTeam(roomName, teamColor, spyName)
+      }
+      socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: false, roomName: roomName, team: teamColor})
+      sendBoard(roomName)
+      sendSpies(roomName)
+      sendCurrentTeam(roomName)
+      console.log(getRoom(roomName))
+  
     }
-    socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: socket.spyMaster, roomName: roomName, teamColor: teamColor})
-    sendBoard(roomName)
-    sendSpies(roomName)
-    sendCurrentTeam(roomName)
-    console.log(getRoom(roomName))
+  })
+
+  socket.on('becomeSpymaster', (teamColor) => {
+    if(teamColor === socket.teamColor){
+
+      setSpymaster(socket.roomName, teamColor, socket)
+      socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: socket.spyMaster, roomName: socket.roomName, team: teamColor})
+      sendBoard(socket.roomName)
+      sendSpies(socket.roomName)
+      sendCurrentTeam(socket.roomName)
+
+    }
   })
 
   socket.on('updateBoard', (word) => {
@@ -297,13 +307,16 @@ io.on("connection", socket => {
     console.log("changeSelection")
     //if(getRoom(socket.roomName).guessesRemaining > 0)
     //{
-      let i = getSpyIndex(socket.roomName, socket.spyName)
-      let oldSpiesData = getSpies(socket.roomName)
-      let spyMaster = getTeamSpyMaster(socket.roomName, socket.teamColor)
-      let newSpiesData = [...oldSpiesData.slice(0, i), {spyName: socket.spyName, cardSelection: word, team: socket.teamColor, isSpyMaster: (spyMaster && (spyMaster.spyName === socket.spyName))}, ...oldSpiesData.slice(i+1)]
-      setSpies(socket.roomName, newSpiesData)
-  
-      sendSpies(socket.roomName)
+      if(getWordIndex(socket.roomName, word)){
+        let i = getSpyIndex(socket.roomName, socket.spyName)
+        let oldSpiesData = getSpies(socket.roomName)
+        let spyMaster = getTeamSpyMaster(socket.roomName, socket.teamColor)
+        let newSpiesData = [...oldSpiesData.slice(0, i), {spyName: socket.spyName, cardSelection: word, team: socket.teamColor, isSpyMaster: (spyMaster && (spyMaster.spyName === socket.spyName))}, ...oldSpiesData.slice(i+1)]
+        setSpies(socket.roomName, newSpiesData)
+    
+        sendSpies(socket.roomName)
+      }
+
     //}
   });
 

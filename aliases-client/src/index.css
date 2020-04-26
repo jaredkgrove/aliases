@@ -20,6 +20,6 @@ code {
 html,body{
   margin:0;
   padding:0;
-  background: hsl(217, 5%, 0%);
+  background: hsl(217, 5%, 15%);
   height:100%;
 }

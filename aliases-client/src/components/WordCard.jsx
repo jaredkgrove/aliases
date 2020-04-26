@@ -28,13 +28,16 @@ export default function WordCard(props) {
     }
 
     const handleClick = () => {
-        props.socket.emit('changeSelection', props.cardData.word)
+        console.log(props.activeTeam)
+        if(props.activeTeam){
+            props.socket.emit('changeSelection', props.cardData.word)
+        }
     }
 
     const renderSelections = () => props.spies.map(spy => <PlayerDiv color={props.activeTeam}>{spy.spyName}</PlayerDiv>)
 
     const renderReveal = () => {
-        return props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton ref={revealDiv} color='green' onClick={handleCardClick}>TAP TO REVEAL</StyledButton> : '')
+        return props.spies.map(spy => (spy.spyName === props.spyName && props.cardData.identity === 0) ? <StyledButton ref={revealDiv} key={spy.spyName} color='green' onClick={handleCardClick}>TAP TO REVEAL</StyledButton> : '')
     }
 
     const checkFontsize = () => {
