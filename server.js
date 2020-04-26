@@ -307,7 +307,7 @@ io.on("connection", socket => {
     console.log("changeSelection")
     //if(getRoom(socket.roomName).guessesRemaining > 0)
     //{
-      if(getWordIndex(socket.roomName, word)){
+      if(getWordIndex(socket.roomName, word) >= 0){
         let i = getSpyIndex(socket.roomName, socket.spyName)
         let oldSpiesData = getSpies(socket.roomName)
         let spyMaster = getTeamSpyMaster(socket.roomName, socket.teamColor)
