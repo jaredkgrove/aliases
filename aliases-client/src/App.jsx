@@ -50,6 +50,11 @@ export default App;
 
 const Layout = styled.div`
   display: block;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height:100vh;
+  width:100vw;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
