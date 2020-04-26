@@ -90,7 +90,7 @@ const StyledBoard = styled.div`
   justify-items: stretch;
   background: white;
   box-sizing: border-box;
-  height: 100%;
+  height: 100vh;
   max-width: 100vw;
   overflow: hidden;
   background: transparent;
