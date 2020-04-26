@@ -9,7 +9,7 @@ import Board from './components/Board'
 import RoomJoin from './components/RoomJoin'
 import styled from 'styled-components'
 // const socket = io("localhost:4001")
-const socket = io("https://anonyms.herokuapp.com/game");
+const socket = io("https://anonyms.herokuapp.com");
 
 function App () {
   const [spyName, setSpyName] = useState('')
@@ -36,10 +36,10 @@ function App () {
 
     return (
         <Switch>
-          <Route exact path="/">
+          {/* <Route exact path="/">
             <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin>
-          </Route>
-          <Route path="/game">
+          </Route> */}
+          <Route exact path="/">
           {!spyName ? <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin> : <Board socket={socket} io={io} spyMaster={spyMaster} spyName={spyName} game={game} team={team}/>}
           </Route>
         </Switch>

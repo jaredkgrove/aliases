@@ -27,8 +27,8 @@ export default function WordCard(props) {
             {/* <StyledLabel htmlFor="spymaster">Spy Master</StyledLabel> */}
           {/* </div> */}
           <div style={{display:'flex', justifyContent:'space-around'}}>
-            <StyledLink color='red' to="/game" onClick={(e) => handleJoinRoom(e, 'red')}>Join Red Team</StyledLink>
-            <StyledLink color='blue' to="/game" onClick={(e) => handleJoinRoom(e, 'blue')}>Join Blue Team</StyledLink>
+            <StyledLink color='red' onClick={(e) => handleJoinRoom(e, 'red')}>Join Red Team</StyledLink>
+            <StyledLink color='blue' onClick={(e) => handleJoinRoom(e, 'blue')}>Join Blue Team</StyledLink>
           </div>
       </AbsoluteContainer>
     );
