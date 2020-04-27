@@ -8,7 +8,7 @@ const axios = require('axios')
 const socketIo = require("socket.io");
 
 const port = process.env.PORT || 4001;
-const index = require("./routes/index");
+// const index = require("./routes/index");
 const {words, blueFirstCipher, redFirstCipher, IdentityEnum} = require("./board");
 // app.use(index);
 app.use(express.static(path.join(__dirname, 'aliases-client/build')));
