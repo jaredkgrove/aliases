@@ -189,7 +189,7 @@ const sendCurrentTeam = (roomName) => {
   try{
     io.in(roomName).emit("startTurn", getCurrentTeamColor(roomName))
   } catch (error) {
-    console.error(`Error sendBoard: ${error.code}`);
+    console.error(`Error start turn: ${error.code}`);
   }
 } 
 
@@ -236,12 +236,11 @@ io.on("connection", socket => {
       try{
         socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: false, roomName: roomName, team: teamColor})
       } catch (error) {
-        console.error(`Error sendBoard: ${error.code}`);
+        console.error(`Error room join: ${error.code}`);
       }
       sendBoard(roomName)
       sendSpies(roomName)
       sendCurrentTeam(roomName)
-      console.log(getRoom(roomName))
   
     }
   })
@@ -250,7 +249,11 @@ io.on("connection", socket => {
     if(teamColor === socket.teamColor){
 
       setSpymaster(socket.roomName, teamColor, socket)
-      socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: socket.spyMaster, roomName: socket.roomName, team: teamColor})
+      try{  
+        socket.emit("SuccessfulJoin", {spyName: socket.spyName, spyMaster: socket.spyMaster, roomName: socket.roomName, team: teamColor})
+      } catch (error) {
+        console.error(`Error spymaster join: ${error.code}`);
+      }
       sendBoard(socket.roomName)
       sendSpies(socket.roomName)
       sendCurrentTeam(socket.roomName)
