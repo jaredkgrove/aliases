@@ -1,51 +1,72 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components'
 import { useInputChange } from './hooks/useInputChange'
-import {
-    Link
-  } from "react-router-dom";
+import {Link} from "react-router-dom";
+import {Grid, ButtonGroup, Paper, makeStyles, FormControl, TextField, Button, FormLabel,RadioGroup,FormControlLabel,Radio} from '@material-ui/core'
+import {ToggleButton} from '@material-ui/lab'
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    
+  },
+}));
 
 export default function WordCard(props) {
     const [input, handleInputChange] = useInputChange()
-
-    const handleJoinRoom = (e, team) => {
+    const classes = useStyles();
+    const [team, setTeam] = useState('red')
+    const handleJoinRoom = (e) => {
         if(!input.room || input.room === ''){
             e.preventDefault()
-        }else(
+        }else{
+          console.log(1)
             props.handleGameJoin(input.room, team, input.spyName)
-        )       
+        }       
     };
-
+    const handleTeamChange = (team) => setTeam(team)
     return (
-      <AbsoluteContainer  >
-        {console.log(props.socket)}
-          <h3 style={{color:'hsl(217, 5%, 80%)'}}>Join Room</h3>
-          <StyledInput type="text"  placeholder="Room Name" name="room" value ={input.room || ''} onChange={handleInputChange}/>
-          <StyledInput type="text" name="spyName" placeholder="Alias" alue={input.spyName || ''} onChange={handleInputChange}/>
-          {/* <div> */}
-            {/* <input type="checkbox" name="spymaster" value={input.spymaster || false} onChange={handleInputChange}/> */}
-            {/* <StyledLabel htmlFor="spymaster">Spy Master</StyledLabel> */}
-          {/* </div> */}
-          <div style={{display:'flex', justifyContent:'space-around'}}>
-            <StyledLink color='red' onClick={(e) => handleJoinRoom(e, 'red')}>Join Red Team</StyledLink>
-            <StyledLink color='blue' onClick={(e) => handleJoinRoom(e, 'blue')}>Join Blue Team</StyledLink>
-          </div>
-      </AbsoluteContainer>
+      < Grid container 
+
+      justify="center"
+      alignItems="center"
+      spacing={0}
+      style={{ minHeight: '100vh'}}
+      >
+        <Grid item xs={9} sm={6} lg={4}>
+          <Paper elevation={3} className={classes.paper} >
+            <Grid 
+            container  
+            spacing={3}    
+            justify="center"
+            
+            >
+              <Grid item xs={9}>
+                <TextField fullWidth label="Room Name" variant="outlined" name="room" value ={input.room || ''} onChange={handleInputChange}/>
+              </Grid>
+              <Grid item xs={9}>
+                <TextField fullWidth label="Alias" variant="outlined" name="spyName" value ={input.spyName || ''} onChange={handleInputChange}/>
+              </Grid>
+              <Grid item xs={9}>
+                  <ButtonGroup variant="contained" fullWidth>
+                    <Button color={team === 'red' ? 'secondary':'grey'} onClick={() => handleTeamChange('red')}>Red</Button>
+                    <Button color={team === 'blue' ? 'primary':'grey'} onClick={() =>handleTeamChange('blue')}>Blue</Button>
+                  </ButtonGroup>
+              </Grid>
+              <Grid item xs={9}>
+                <Button fullWidth variant="outlined" color="primary" onClick={handleJoinRoom}>Join Game</Button>
+              </Grid>
+            </Grid>
+          </Paper>  
+        </Grid>
+      </Grid>
     );
 }
 
 
-const AbsoluteContainer = styled.div`
-    position: absolute;
-    left:50vw;
-    top: 50vh;
-    transform: translate(-50%, -50%);
-    background: hsl(217, 5%, 35%);
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    min-width: 300px;
-`;
+
 
 const StyledInput = styled.input`
   box-sizing: border-box;
@@ -70,17 +91,4 @@ const StyledLink = styled(Link)`
   border-radius: 5px;
   height: 100%;
   color: hsl(217, 5%, 90%);
-`
-
-const StyledLabel = styled.div`
-    box-sizing: border-box;
-    padding: 5px;
-    display: inline-block;
-    margin: 5px;
-
-    color: hsl(217, 5%, 80%);
-
-
-    height: 35px;
-
 `

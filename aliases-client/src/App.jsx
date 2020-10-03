@@ -7,9 +7,9 @@ import {
 
 import Board from './components/Board'
 import RoomJoin from './components/RoomJoin'
-import styled from 'styled-components'
-// const socket = io("localhost:4001")
-const socket = io("https://anonyms.herokuapp.com");
+
+const socket = io("localhost:4001")
+// const socket = io("https://anonyms.herokuapp.com");
 
 function App () {
   const [spyName, setSpyName] = useState('')
@@ -26,9 +26,9 @@ function App () {
     setSpyMaster(data.spyMaster)
     setSpyName(data.spyName)
   }
+
   useEffect(() => {
     socket.on('SuccessfulJoin', data => handleSuccessfulJoin(data));
-
     return () => {
       socket.off('SuccessfulJoin', data => handleSuccessfulJoin(data));
     }
@@ -40,24 +40,10 @@ function App () {
             <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin>
           </Route> */}
           <Route exact path="/">
-          {!spyName ? <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin> : <Board socket={socket} io={io} spyMaster={spyMaster} spyName={spyName} game={game} team={team}/>}
+            {!spyName ? <RoomJoin socket={socket} handleGameJoin={handleGameJoin}></RoomJoin> : <Board socket={socket} io={io} spyMaster={spyMaster} spyName={spyName} game={game} team={team}/>}
           </Route>
         </Switch>
     );
 }
 
 export default App;
-
-const Layout = styled.div`
-  display: block;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  height:100vh;
-  width:100vw;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-  sans-serif;
-
-
-`;
